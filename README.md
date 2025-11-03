@@ -1,462 +1,762 @@
-# 📱 Voz do Povo - Flutter App= # Voz do Povo - Aplicativo Flutter
+<div align="center"><div align="center">
 
 
 
-Aplicativo móvel para conectar cidadãos e gestão pública através de denúncias georreferenciadas.Este é o aplicativo móvel para o projeto Voz do Povo, uma plataforma para conectar cidadãos e a gestão pública.
+# 📱 Voz do Povo# 📱 Voz do Povo
 
 
 
-**Status:** 25% concluído (Autenticação 100% + Infraestrutura 100%)  ---
+### Plataforma Mobile para Denúncias Cidadãs### Plataforma Mobile para Denúncias Cidadãs
 
-**Próxima Feature:** Home com Mapa Interativo
 
-## 📚 DOCUMENTAÇÃO
 
----
+[![Flutter](https://img.shields.io/badge/Flutter-3.9.0+-02569B?logo=flutter)](https://flutter.dev)[![Flutter](https://img.shields.io/badge/Flutter-3.9.0+-02569B?logo=flutter)](https://flutter.dev)
 
-### 🎯 COMEÇE AQUI
+[![Dart](https://img.shields.io/badge/Dart-3.9.0+-0175C2?logo=dart)](https://dart.dev)[![Dart](https://img.shields.io/badge/Dart-3.9.0+-0175C2?logo=dart)](https://dart.dev)
 
-## 🚀 Quick Start- 📄 **[INDICE_GERAL.md](INDICE_GERAL.md)** - Índice de toda a documentação
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-- 📄 **[RESUMO_EXECUTIVO.md](RESUMO_EXECUTIVO.md)** - O que foi feito e o que falta (10 min)
 
-### Pré-requisitos- 📄 **[DOCUMENTACAO_COMPLETA.md](DOCUMENTACAO_COMPLETA.md)** - Documentação técnica completa (30 min)
 
-- 📄 **[LEVANTAMENTO_COMPLETO.md](LEVANTAMENTO_COMPLETO.md)** - Lista de arquivos implementados (20 min)
+*Conectando cidadãos e gestão pública através de denúncias georreferenciadas**Conectando cidadãos e gestão pública através de denúncias georreferenciadas*
 
-- Flutter 3.9.0+
 
-- Dart 3.9.0+### 📖 REFERÊNCIAS
 
-- Android Studio / VS Code- 📄 **[REQUISITOS_UI_UX.md](REQUISITOS_UI_UX.md)** - Especificações de design
+[Começar](#-quick-start) • [Documentação](#-documentação) • [Arquitetura](#️-arquitetura) • [Features](#-features)[Começar](#-quick-start) • [Documentação](#-documentação) • [Arquitetura](#️-arquitetura) • [Features](#-features)
 
-- Dispositivo Android físico ou emulador- 📄 **[GUIA-FLUTTER.MD](GUIA-FLUTTER.MD)** - Guia de arquitetura e padrões
 
-- Backend Django rodando- 📄 **[COMANDOS_UTEIS.md](COMANDOS_UTEIS.md)** - Comandos úteis Flutter/Django
 
+</div></div>
 
 
-### Instalação---
 
+------
 
 
-```bash## 🚀 Quick Start
 
-# 1. Clone o repositório
+## 📖 Sobre o Projeto## 📖 Sobre o Projeto
 
-git clone <url-do-repositorio>### Pré-requisitos
 
-cd voz_do_povo_flutter- Flutter 3.9.0+
 
-- Dart 3.9.0+
+**Voz do Povo** é um aplicativo móvel desenvolvido em Flutter que permite aos cidadãos reportar problemas urbanos (buracos, iluminação, lixo, etc.) através de denúncias georreferenciadas com fotos e descrições detalhadas. A plataforma conecta a população diretamente com a gestão pública municipal.**Voz do Povo** é um aplicativo móvel desenvolvido em Flutter que permite aos cidadãos reportar problemas urbanos (buracos, iluminação, lixo, etc.) através de denúncias georreferenciadas com fotos e descrições detalhadas. A plataforma conecta a população diretamente com a gestão pública municipal.
 
-# 2. Instale as dependências- Dispositivo Android físico ou emulador
 
-flutter pub get- Backend Django rodando
 
+### Status do Projeto### Status do Projeto
 
 
-# 3. Execute o app### Instalação
 
-flutter run
+``````
 
-```1. **Clone o repositório**
+🟢 Autenticação ████████████████████████████████████████ 100%� Autenticação ████████████████████████████████████████ 100%
 
-```bash
+🟢 Infraestrutura ████████████████████████████████████████ 100%🟢 Infraestrutura ████████████████████████████████████████ 100%
 
-### Configurar Backendgit clone <url-do-repositorio>
+🟡 Home & Mapa ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░  30%� Home & Mapa ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░  30%
 
-cd voz_do_povo_flutter
+⚪ Denúncias    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%⚪ Denúncias    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 
-**Para Emulador:**```
-
-```dart
-
-// lib/config/dio/dio_client.dart2. **Instale as dependências**
-
-const String baseUrl = 'http://10.0.2.2:8000';  // Android Emulator```bash
-
-```flutter pub get
-
-```
-
-**Para Dispositivo Físico:**
-
-```bash3. **Configure o Backend**
-
-# 1. Descubra seu IP local   - Certifique-se de que o backend está rodando em `http://192.168.1.10:8000`
-
-ipconfig  # Windows   - Veja [USAR_CELULAR_ANDROID.md](USAR_CELULAR_ANDROID.md) para configuração
-
-ifconfig  # Linux/Mac
-
-4. **Execute o app**
-
-# 2. Inicie o backend no IP da rede```bash
-
-python manage.py runserver 0.0.0.0:8000flutter run
-
-```
-
-# 3. Atualize o baseUrl no app
-
-// lib/config/dio/dio_client.dart---
-
-const String baseUrl = 'http://SEU_IP:8000';  // Ex: http://192.168.1.10:8000
-
-## ✅ O Que Está Pronto
-
-# 4. Conecte o dispositivo na mesma rede Wi-Fi
-
-# 5. Habilite Depuração USB no celular### Sistema de Autenticação (100%)
-
-# 6. Execute: flutter run- ✅ Login com JWT tokens
-
-```- ✅ Cadastro de usuário
-
-- ✅ Verificação de email (código 5 dígitos)
-
----- ✅ Reset de senha (3 etapas)
-
-- ✅ Modo visitante com apelido persistente
-
-## 📱 Testar no Celular- ✅ Auto-restauração de sessão
-
-
-
-### Android (Samsung A32 / Outros)### Infraestrutura (100%)
-
-- ✅ Clean Architecture implementada
-
-```bash- ✅ Riverpod para state management
-
-# 1. Habilitar modo desenvolvedor- ✅ Dio client com interceptors
-
-# Configurações > Sobre o telefone > Toque 7x em "Número da versão"- ✅ FlutterSecureStorage para persistência
-
-- ✅ GoRouter com guards de autenticação
-
-# 2. Habilitar depuração USB- ✅ 7 exceções customizadas
-
-# Configurações > Opções do desenvolvedor > Depuração USB
-
-**Total:** 10 telas, ~5.000 linhas de código, 0 erros
-
-# 3. Conectar via USB
-
-# Conecte o cabo USB ao computador---
-
-
-
-# 4. Verificar dispositivos## 🔴 O Que Falta
-
-flutter devices
-
-### Próxima Feature: Home com Mapa (PRIORIDADE #1)
-
-# 5. Executar no dispositivo- 🔴 Google Maps integrado
-
-flutter run -d <DEVICE_ID>- 🔴 Marcadores de denúncias
-
-```- 🔴 Bottom Navigation Bar
-
-- 🔴 Bottom sheet de preview
-
-### Troubleshooting- 🔴 Barra de pesquisa
-
-
-
-**Erro "Connection refused":**### Demais Features
-
-- Backend deve estar em IP local (192.168.1.10), não localhost- 🔴 Criar denúncia com fotos
-
-- Celular e computador na mesma rede Wi-Fi- 🔴 Detalhes da denúncia
-
-- Firewall pode estar bloqueando- 🔴 Sistema de comentários
-
-- 🔴 Perfil do usuário
-
-**Erro "Unauthorized device":**- 🔴 Minhas denúncias
-
-- Aceitar prompt de autorização no celular
-
-- Reinstalar drivers USB (Windows)**Progresso Total:** 25% ████░░░░░░░░░░░░░░░░
-
-
-
-**App não conecta ao backend:**---
-
-- Verificar baseUrl no dio_client.dart
-
-- Testar backend no navegador do celular: http://SEU_IP:8000/api/health/## 🏗️ Arquitetura
-
-- Verificar se backend está rodando em 0.0.0.0:8000
-
-O projeto segue **Clean Architecture** com organização **Feature-First**:
-
----
-
-```
-
-## 🏗️ Estrutura do Projetolib/
-
-├── main.dart
-
-```├── config/          # Configurações (Dio, Router, Env)
-
-lib/├── core/            # Código compartilhado (Exceptions, Widgets)
-
-├── main.dart                   # Entry point└── features/
-
-├── config/    └── autenticacao/  # Feature completa
-
-│   ├── dio/                    # HTTP Client (Dio)        ├── data/        # Models, Datasources, Repositories
-
-│   ├── env/                    # Environment variables        └── presentation/ # Notifiers, Views
-
-│   └── router/                 # Navegação (GoRouter)```
-
-├── core/
-
-│   └── exceptions/             # Exceções customizadas---
-
-└── features/
-
-    └── autenticacao/           # ✅ COMPLETO (10 telas)## 🧪 Testes
-
-        ├── data/
-
-        │   ├── datasources/    # API calls```bash
-
-        │   ├── models/         # Data models# Rodar testes
-
-        │   └── repositories/   # Business logicflutter test
-
-        └── presentation/
-
-            ├── notifiers/      # State management (Riverpod)# Rodar testes com coverage
-
-            └── views/          # UI (Screens)flutter test --coverage
+⚪ Perfil       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%⚪ Perfil       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0%
 
 ``````
 
 
 
----**Status:** Testes não implementados (0%)
+**Progresso Total:** 35% completo**Progresso Total:** 35% completo
 
 
 
-## ✅ Features Implementadas---
+------
 
 
 
-### 🔐 Autenticação (100%)## 📱 Testar em Dispositivo Físico
+## 🚀 Quick Start## 🚀 Quick Start
 
 
 
-- ✅ **Login** - JWT com access + refresh tokensVeja o guia completo: **[USAR_CELULAR_ANDROID.md](USAR_CELULAR_ANDROID.md)**
-
-- ✅ **Cadastro** - Com validação em tempo real
-
-- ✅ **Verificação de Email** - Código de 5 dígitos1. Conecte o dispositivo via USB
-
-- ✅ **Esqueci Senha** - Fluxo em 3 etapas (request → validate → set)2. Habilite depuração USB
-
-- ✅ **Modo Visitante** - Apelido persistente sem cadastro3. Backend em IP local (192.168.1.10)
-
-- ✅ **Auto-restauração** - Sessão persiste ao fechar app4. Mesma rede Wi-Fi
+### Pré-requisitos### Pré-requisitos
 
 
 
-**Telas:** 10/10  ---
+- Flutter SDK 3.9.0 ou superior- Flutter SDK 3.9.0 ou superior
 
-**Linhas de código:** ~2.500  
+- Dart SDK 3.9.0 ou superior- Dart SDK 3.9.0 ou superior
 
-**Endpoints:** 8 integrados## 🐛 Depuração
+- Android Studio / VS Code- Android Studio / VS Code
 
+- Dispositivo Android físico ou emulador- Dispositivo Android físico ou emulador
 
-
-### 🗄️ Persistência (100%)Veja: **[LOGS_README.md](LOGS_README.md)**
-
-
-
-- ✅ **FlutterSecureStorage** - Criptografia nativaOs logs do Dio mostram:
-
-- ✅ **Dados permanentes** - Persiste após fechar app/reiniciar- 🌐 REQUEST - Requisições enviadas
-
-- ✅ **3 keys:** access_token, refresh_token, guest_nickname- ✅ SUCCESS - Respostas bem-sucedidas
-
-- ❌ ERROR - Erros detalhados
-
-### 🌐 Networking (100%)- ⛔ 403 - Problemas de autenticação
+- Backend Django rodando (veja [configuração](#configurar-backend))- Backend Django rodando (veja [configuração](#configurar-backend))
 
 
 
-- ✅ **Dio Client** - Configurado com interceptors---
-
-- ✅ **Base URL:** http://192.168.1.10:8000
-
-- ✅ **Logging detalhado** - REQUEST, SUCCESS, ERROR## 📊 Progresso por Feature
-
-- ✅ **Whitelist** - 7 endpoints públicos (sem token)
-
-- ✅ **Error handling** - 7 exceções customizadas| Feature | Status | Progresso |
-
-|---------|--------|-----------|
-
-### 🎛️ State Management (100%)| Autenticação | ✅ Completo | 100% |
-
-| Home com Mapa | 🔴 Não iniciado | 0% |
-
-- ✅ **Riverpod 2.5.1** - AuthNotifier com 12 métodos| Criar Denúncia | 🔴 Não iniciado | 0% |
-
-- ✅ **AuthState** - isLoggedIn, isGuest, guestNickname| Detalhes | 🔴 Não iniciado | 0% |
-
-- ✅ **Auto-load** - Restaura sessão ao iniciar| Perfil | 🔴 Não iniciado | 0% |
+### Instalação### Instalação
 
 
 
-### 🗺️ Navegação (100%)---
+```bash```bash
+
+# 1. Clone o repositório# 1. Clone o repositório
+
+git clone https://github.com/eibrunoruan/VOZ_APP.gitgit clone https://github.com/eibrunoruan/VOZ_APP.git
+
+cd voz_do_povo_fluttercd voz_do_povo_flutter
 
 
 
-- ✅ **GoRouter 13.2.0** - 11 rotas implementadas## 🤝 Contribuindo
+# 2. Instale as dependências# 2. Instale as dependências
 
-- ✅ **Guards** - Autenticação em rotas protegidas
-
-- ✅ **Redirect logic** - Não autenticado → Welcome, Autenticado → Home1. Leia **[GUIA-FLUTTER.MD](GUIA-FLUTTER.MD)** para padrões de código
-
-2. Leia **[DOCUMENTACAO_COMPLETA.md](DOCUMENTACAO_COMPLETA.md)** para contexto
-
----3. Crie uma branch para sua feature
-
-4. Faça commit das mudanças
-
-## 🔴 Próximas Features5. Abra um Pull Request
+flutter pub getflutter pub get
 
 
 
-### 1. Home com Mapa (PRÓXIMA - 5-6 dias)---
+# 3. Execute o aplicativo# 3. Execute o aplicativo
 
-- 🔴 Google Maps integrado
+flutter runflutter run```
 
-- 🔴 Marcadores de denúncias por status## 📄 Licença
+```
 
-- 🔴 Bottom Navigation Bar customizada
+### Configurar Backend
 
-- 🔴 Bottom sheet de preview[Adicionar licença aqui]
+### Configurar Backend
 
-- 🔴 Barra de pesquisa flutuante
+#### Para Emulador Android
+
+#### Para Emulador Android
+
+```dart
+
+```dart// lib/config/dio/dio_client.dart
+
+// lib/config/dio/dio_client.dartconst String baseUrl = 'http://10.0.2.2:8000';  // Android Emulator
+
+const String baseUrl = 'http://10.0.2.2:8000';  // Android Emulator```
+
+```
+
+#### Para Dispositivo Físico
+
+#### Para Dispositivo Físico
+
+```bash
+
+```bash# 1. Descubra seu IP local
+
+# 1. Descubra seu IP localipconfig    # Windows
+
+ipconfig    # Windowsifconfig    # Linux/Mac
+
+ifconfig    # Linux/Mac
+
+# 2. Inicie o backend no IP da rede
+
+# 2. Inicie o backend no IP da redepython manage.py runserver 0.0.0.0:8000
+
+python manage.py runserver 0.0.0.0:8000
+
+# 3. Atualize o baseUrl no app
+
+# 3. Atualize o baseUrl no app// lib/config/dio/dio_client.dart
+
+// lib/config/dio/dio_client.dartconst String baseUrl = 'http://192.168.1.10:8000';  // Seu IP local
+
+const String baseUrl = 'http://192.168.1.10:8000';  // Seu IP local
+
+# 4. Conecte o dispositivo na mesma rede Wi-Fi
+
+# 4. Conecte o dispositivo na mesma rede Wi-Fi# 5. Habilite Depuração USB
+
+# 5. Habilite Depuração USB# 6. Execute: flutter run
+
+# 6. Execute: flutter run```
+
+```
+
+📄 **Guia completo:** [USAR_CELULAR_ANDROID.md](USAR_CELULAR_ANDROID.md)
+
+📄 **Guia completo:** [USAR_CELULAR_ANDROID.md](USAR_CELULAR_ANDROID.md)
 
 ---
 
-### 2. Criar Denúncia (5-6 dias)
+---
 
-- 🔴 Formulário multi-step## 📞 Contato
+## 🏗️ Arquitetura
 
-- 🔴 Upload de fotos (câmera/galeria)
+## 🏗️ Arquitetura
 
-- 🔴 Seleção de localização[Adicionar contato aqui]
+Este projeto segue os princípios de **Clean Architecture** com organização **Feature-First**:
 
-- 🔴 Integração com modo visitante
+Este projeto segue os princípios de **Clean Architecture** com organização **Feature-First**:
+
+```
+
+```lib/
+
+lib/├── main.dart                    # Entry point
+
+├── main.dart                    # Entry point├── config/
+
+├── config/│   ├── dio/                     # HTTP Client (Dio + Interceptors)
+
+│   ├── dio/                     # HTTP Client (Dio + Interceptors)│   ├── env/                     # Environment variables
+
+│   ├── env/                     # Environment variables│   └── router/                  # Navegação (GoRouter + Guards)
+
+│   └── router/                  # Navegação (GoRouter + Guards)├── core/
+
+├── core/│   ├── exceptions/              # 7 exceções customizadas
+
+│   ├── exceptions/              # 7 exceções customizadas│   └── widgets/                 # Widgets compartilhados
+
+│   └── widgets/                 # Widgets compartilhados└── features/
+
+└── features/    ├── autenticacao/            # ✅ 100% Completo
+
+    ├── autenticacao/            # ✅ 100% Completo    │   ├── data/
+
+    │   ├── data/    │   │   ├── datasources/     # API calls
+
+    │   │   ├── datasources/     # API calls    │   │   ├── models/          # DTOs
+
+    │   │   ├── models/          # DTOs    │   │   └── repositories/    # Business logic
+
+    │   │   └── repositories/    # Business logic    │   └── presentation/
+
+    │   └── presentation/    │       ├── notifiers/       # State (Riverpod)
+
+    │       ├── notifiers/       # State (Riverpod)    │       └── views/           # UI (10 telas)
+
+    │       └── views/           # UI (10 telas)    ├── home/                    # 🟡 30% Em desenvolvimento
+
+    ├── home/                    # 🟡 30% Em desenvolvimento    └── denuncias/               # ⚪ Próxima feature
+
+    └── denuncias/               # ⚪ Próxima feature```
+
+```
+
+### Tecnologias e Padrões
+
+### Tecnologias e Padrões
+
+- **State Management:** Riverpod 2.5.1
+
+- **State Management:** Riverpod 2.5.1- **HTTP Client:** Dio 5.4.0 com interceptors personalizados
+
+- **HTTP Client:** Dio 5.4.0 com interceptors personalizados- **Navegação:** GoRouter 13.0.0 com guards de autenticação
+
+- **Navegação:** GoRouter 13.0.0 com guards de autenticação- **Persistência:** FlutterSecureStorage 9.0.0 (criptografia nativa)
+
+- **Persistência:** FlutterSecureStorage 9.0.0 (criptografia nativa)- **Mapas:** Google Maps Flutter 2.5.3
+
+- **Mapas:** Google Maps Flutter 2.5.3- **Arquitetura:** Clean Architecture + Feature-First
+
+- **Arquitetura:** Clean Architecture + Feature-First
 
 ---
 
-### 3. Detalhes e Comentários (4-5 dias)
+---
 
-- 🔴 Tela de detalhes completa**Última atualização:** 01 de Novembro de 2025  
+## ✨ Features
 
-- 🔴 Sistema de apoios**Versão:** 2.0  
+## ✨ Features
 
-- 🔴 Comentários**Status:** Base sólida, pronto para features principais! 🚀
+### ✅ Sistema de Autenticação (100%)
 
+### ✅ Sistema de Autenticação (100%)
 
+- **Login** - JWT com access + refresh tokens
 
-### 4. Perfil (3-4 dias)---
+- **Login** - JWT com access + refresh tokens- **Cadastro** - Validação em tempo real
 
-- 🔴 Dados do usuário
+- **Cadastro** - Validação em tempo real- **Verificação de Email** - Código de 5 dígitos
 
-- 🔴 Minhas denúncias## 🎓 Histórico do Backend (Contexto)
+- **Verificação de Email** - Código de 5 dígitos- **Esqueci Senha** - Fluxo em 3 etapas
 
-- 🔴 Estatísticas
+- **Esqueci Senha** - Fluxo em 3 etapas- **Modo Visitante** - Apelido persistente sem cadastro
 
-> **Nota:** O texto abaixo refere-se ao backend Django.
+- **Modo Visitante** - Apelido persistente sem cadastro- **Auto-restauração** - Sessão persiste após fechar app
 
-**Tempo estimado para MVP:** 3-4 semanas> Para documentação do app Flutter, veja os links acima.
+- **Auto-restauração** - Sessão persiste após fechar app
 
+**Telas:** 10/10 | **Código:** ~2.500 linhas | **Endpoints:** 8 integrados
 
+**Telas:** 10/10 | **Código:** ~2.500 linhas | **Endpoints:** 8 integrados
 
----## O Que Foi Feito (Backend)
+### 🟡 Home com Mapa (30%)
 
+### 🟡 Home com Mapa (30%)
 
+- ✅ Google Maps integrado com API Key
 
-## 🧪 Testes1.  **Modelo de Usuário Customizado**: Foi implementado um modelo de usuário (`User`) customizado que herda do `AbstractUser` do Django. Isso permite maior flexibilidade para futuras modificações.
+- ✅ Google Maps integrado com API Key- ✅ Bottom Navigation (Mapa, Denúncias, Perfil)
 
-2.  **Gerenciador de Usuário**: Um `UserManager` customizado foi criado para gerenciar a criação de usuários e superusuários, utilizando `email` e `username` como campos principais.
+- ✅ Bottom Navigation (Mapa, Denúncias, Perfil)- ✅ Cards de denúncias com geocoding
 
-```bash3.  **Ajuste no Campo `username`**: O modelo `User` e seu gerenciador foram ajustados para resolver um `TypeError` que ocorria durante a criação de um superusuário. O campo `username` foi definido como o campo de login (`USERNAME_FIELD`).
+- ✅ Cards de denúncias com geocoding- 🟡 Criação de denúncia (5 etapas)
 
-# Rodar todos os testes4.  **Estrutura de Autenticação**: Foram criadas as rotas e views básicas para registro (`/api/auth/register/`) e login (`/api/auth/login/`) de usuários usando `djangorestframework-simplejwt` para autenticação baseada em token.
+- 🟡 Criação de denúncia (5 etapas)- 🟡 Marcadores no mapa
 
-flutter test5.  **API de Localidades**: Foi criada a API para consulta de estados e cidades, com rotas em `/api/localidades/`. Os dados de estados são populados via migração e os de cidades através de um comando customizado que consome a API do IBGE.
+- 🟡 Marcadores no mapa- ⚪ Filtros e pesquisa
 
+- ⚪ Filtros e pesquisa- ⚪ Bottom sheet de preview
 
+- ⚪ Bottom sheet de preview
 
-# Rodar com coverage## Como Rodar o Projeto
+### ⚪ Gestão de Denúncias (0%)
+
+### ⚪ Gestão de Denúncias (0%)
+
+- ⚪ Criar denúncia com fotos
+
+- ⚪ Criar denúncia com fotos- ⚪ Upload de imagens
+
+- ⚪ Upload de imagens- ⚪ Detalhes da denúncia
+
+- ⚪ Detalhes da denúncia- ⚪ Sistema de comentários
+
+- ⚪ Sistema de comentários- ⚪ Acompanhamento de status
+
+- ⚪ Acompanhamento de status
+
+### ⚪ Perfil do Usuário (0%)
+
+### ⚪ Perfil do Usuário (0%)
+
+- ⚪ Editar perfil
+
+- ⚪ Editar perfil- ⚪ Minhas denúncias
+
+- ⚪ Minhas denúncias- ⚪ Histórico de atividades
+
+- ⚪ Histórico de atividades- ⚪ Configurações
+
+- ⚪ Configurações
+
+---
+
+---
+
+## 📚 Documentação
+
+## 📚 Documentação
+
+### Guias Principais
+
+### Guias Principais
+
+- 📄 [INDICE_GERAL.md](INDICE_GERAL.md) - Índice completo da documentação
+
+- 📄 [INDICE_GERAL.md](INDICE_GERAL.md) - Índice completo da documentação- 📄 [RESUMO_EXECUTIVO.md](RESUMO_EXECUTIVO.md) - Resumo executivo (10 min)
+
+- 📄 [RESUMO_EXECUTIVO.md](RESUMO_EXECUTIVO.md) - Resumo executivo (10 min)- � [DOCUMENTACAO_COMPLETA.md](DOCUMENTACAO_COMPLETA.md) - Documentação técnica (30 min)
+
+- 📄 [DOCUMENTACAO_COMPLETA.md](DOCUMENTACAO_COMPLETA.md) - Documentação técnica (30 min)
+
+### Guias Técnicos
+
+### Guias Técnicos
+
+- 📄 [GUIA-FLUTTER.MD](GUIA-FLUTTER.MD) - Arquitetura e padrões
+
+- 📄 [GUIA-FLUTTER.MD](GUIA-FLUTTER.MD) - Arquitetura e padrões- 📄 [REQUISITOS_UI_UX.md](REQUISITOS_UI_UX.md) - Design system
+
+- 📄 [REQUISITOS_UI_UX.md](REQUISITOS_UI_UX.md) - Design system- � [COMANDOS_UTEIS.md](COMANDOS_UTEIS.md) - Comandos úteis
+
+- 📄 [COMANDOS_UTEIS.md](COMANDOS_UTEIS.md) - Comandos úteis- 📄 [LOGS_README.md](LOGS_README.md) - Sistema de logs
+
+- 📄 [LOGS_README.md](LOGS_README.md) - Sistema de logs
+
+### Configuração
+
+### Configuração
+
+- � [USAR_CELULAR_ANDROID.md](USAR_CELULAR_ANDROID.md) - Testar em dispositivo físico
+
+- 📄 [USAR_CELULAR_ANDROID.md](USAR_CELULAR_ANDROID.md) - Testar em dispositivo físico- � [GOOGLE_MAPS_SETUP.md](GOOGLE_MAPS_SETUP.md) - Configurar Google Maps API
+
+- 📄 [GOOGLE_MAPS_SETUP.md](GOOGLE_MAPS_SETUP.md) - Configurar Google Maps API- 📄 [ERROS_RESOLVIDOS.md](ERROS_RESOLVIDOS.md) - Troubleshooting
+
+- 📄 [ERROS_RESOLVIDOS.md](ERROS_RESOLVIDOS.md) - Troubleshooting
+
+---
+
+---
+
+## 🧪 Testes
+
+## 🧪 Testes
+
+```bash
+
+```bash# Rodar todos os testes
+
+# Rodar todos os testesflutter test
+
+flutter test
+
+# Testes com coverage
+
+# Testes com coverageflutter test --coverage
 
 flutter test --coverage
 
-1.  **Clone o Repositório** (se ainda não o fez).
+# Análise de código
 
-# Ver coverage no navegador
+# Análise de códigoflutter analyze
 
-genhtml coverage/lcov.info -o coverage/html2.  **Crie e Ative um Ambiente Virtual**:
+flutter analyze```
 
-open coverage/html/index.html    ```bash
+```
 
-```    # Crie o ambiente virtual
+**Status:** Testes unitários não implementados (0%)
 
-    python -m venv .venv
-
-**Status atual:** Testes não implementados (0%)
-
-    # Ative no Windows
-
----    .\.venv\Scripts\activate
-
-
-
-## 📊 Progresso    # Ative no Linux/macOS
-
-    # source .venv/bin/activate
-
-```    ```
-
-Autenticação:      ████████████████████ 100%
-
-Infraestrutura:    ████████████████████ 100%3.  **Instale as Dependências**:
-
-Home/Mapa:         ░░░░░░░░░░░░░░░░░░░░ 0%    ```bash
-
-Criar Denúncia:    ░░░░░░░░░░░░░░░░░░░░ 0%    pip install -r requirements.txt
-
-Detalhes:          ░░░░░░░░░░░░░░░░░░░░ 0%    ```
-
-Perfil:            ░░░░░░░░░░░░░░░░░░░░ 0%
-
-────────────────────────────────────────4.  **Execute as Migrações do Banco de Dados**:
-
-TOTAL:             ████░░░░░░░░░░░░░░░░ 25%    ```bash
-
-```    python manage.py migrate
-
-    ```
+**Status:** Testes unitários não implementados (0%)
 
 ---
 
-5.  **Popule o Banco de Dados com Localidades**:
+---
 
-## 🛠️ Comandos Úteis    Execute os comandos abaixo para popular o banco de dados com os estados e cidades do Brasil.
+## 📱 Testar em Dispositivo Android
+
+## 📱 Testar em Dispositivo Android
+
+### Configuração Rápida
+
+### Configuração Rápida
+
+```bash
+
+```bash# 1. Habilitar modo desenvolvedor
+
+# 1. Habilitar modo desenvolvedor# Configurações > Sobre o telefone > Toque 7x em "Número da versão"
+
+# Configurações > Sobre o telefone > Toque 7x em "Número da versão"
+
+# 2. Habilitar depuração USB
+
+# 2. Habilitar depuração USB# Configurações > Opções do desenvolvedor > Depuração USB
+
+# Configurações > Opções do desenvolvedor > Depuração USB
+
+# 3. Conectar via USB e verificar
+
+# 3. Conectar via USB e verificarflutter devices
+
+flutter devices
+
+# 4. Executar no dispositivo
+
+# 4. Executar no dispositivoflutter run -d <DEVICE_ID>
+
+flutter run -d <DEVICE_ID>```
+
+```
+
+### Troubleshooting
+
+### Troubleshooting
+
+| Erro | Solução |
+
+| Erro | Solução ||------|---------|
+
+|------|---------|| **Connection refused** | Backend em IP local, não localhost. Mesma rede Wi-Fi |
+
+| **Connection refused** | Backend em IP local, não localhost. Mesma rede Wi-Fi || **Unauthorized device** | Aceitar prompt de autorização no celular |
+
+| **Unauthorized device** | Aceitar prompt de autorização no celular || **App não conecta** | Verificar `baseUrl` em `dio_client.dart` e testar backend: `http://SEU_IP:8000/api/health/` |
+
+| **App não conecta** | Verificar `baseUrl` em `dio_client.dart` e testar backend: `http://SEU_IP:8000/api/health/` |
+
+---
+
+---
+
+## 🐛 Debug e Logs
+
+## 🐛 Debug e Logs
+
+O sistema de logs do Dio exibe:
+
+O sistema de logs do Dio exibe:- 🌐 **REQUEST** - Requisições enviadas
+
+- 🌐 **REQUEST** - Requisições enviadas- ✅ **SUCCESS** - Respostas bem-sucedidas  
+
+- ✅ **SUCCESS** - Respostas bem-sucedidas  - ❌ **ERROR** - Erros detalhados
+
+- ❌ **ERROR** - Erros detalhados- ⛔ **403** - Problemas de autenticação
+
+- ⛔ **403** - Problemas de autenticação
+
+Veja [LOGS_README.md](LOGS_README.md) para mais detalhes.
+
+Veja [LOGS_README.md](LOGS_README.md) para mais detalhes.
+
+---
+
+---
+
+## 🏗️ Estrutura do Projetolib/
+
+## 🛠️ Stack Tecnológica
+
+├── main.dart
+
+| Categoria | Tecnologia | Versão |
+
+|-----------|-----------|--------|```├── config/          # Configurações (Dio, Router, Env)
+
+| Framework | Flutter | 3.9.0+ |
+
+| Linguagem | Dart | 3.9.0+ |lib/├── core/            # Código compartilhado (Exceptions, Widgets)
+
+| State Management | Riverpod | 2.5.1 |
+
+| HTTP Client | Dio | 5.4.0 |├── main.dart                   # Entry point└── features/
+
+| Navegação | GoRouter | 13.0.0 |
+
+| Persistência | FlutterSecureStorage | 9.0.0 |├── config/    └── autenticacao/  # Feature completa
+
+| Mapas | Google Maps Flutter | 2.5.3 |
+
+| Localização | Geolocator | 11.0.0 |│   ├── dio/                    # HTTP Client (Dio)        ├── data/        # Models, Datasources, Repositories
+
+| Geocoding | Geocoding | 3.0.0 |
+
+│   ├── env/                    # Environment variables        └── presentation/ # Notifiers, Views
+
+---
+
+│   └── router/                 # Navegação (GoRouter)```
+
+## 📈 Estatísticas do Projeto
+
+├── core/
+
+```
+
+📁 Features Completas:    1/5 (20%)│   └── exceptions/             # Exceções customizadas---
+
+📄 Telas Implementadas:   10/35 (29%)
+
+📝 Linhas de Código:      ~5.000└── features/
+
+🔌 Endpoints Integrados:  8
+
+🧪 Cobertura de Testes:   0%    └── autenticacao/           # ✅ COMPLETO (10 telas)## 🧪 Testes
+
+🐛 Bugs Conhecidos:       0
+
+```        ├── data/
+
+
+
+---        │   ├── datasources/    # API calls```bash
+
+
+
+## 🗺️ Roadmap        │   ├── models/         # Data models# Rodar testes
+
+
+
+### ✅ Fase 1 - Autenticação (Concluída)        │   └── repositories/   # Business logicflutter test
+
+- [x] Sistema completo de autenticação
+
+- [x] Infraestrutura base (Dio, Router, Storage)        └── presentation/
+
+- [x] Design system e componentes reutilizáveis
+
+            ├── notifiers/      # State management (Riverpod)# Rodar testes com coverage
+
+### 🟡 Fase 2 - Home & Navegação (Em Andamento)
+
+- [x] Integração Google Maps            └── views/          # UI (Screens)flutter test --coverage
+
+- [x] Bottom Navigation
+
+- [x] Cards de denúncias``````
+
+- [ ] Criação de denúncia completa
+
+- [ ] Marcadores no mapa
+
+- [ ] Filtros e pesquisa
+
+---**Status:** Testes não implementados (0%)
+
+### ⚪ Fase 3 - Gestão de Denúncias
+
+- [ ] CRUD completo de denúncias
+
+- [ ] Upload de múltiplas fotos
+
+- [ ] Sistema de comentários## ✅ Features Implementadas---
+
+- [ ] Notificações push
+
+- [ ] Acompanhamento de status## �️ Stack Tecnológica
+
+
+
+### ⚪ Fase 4 - Perfil & Social| Categoria | Tecnologia | Versão |
+
+- [ ] Perfil do usuário|-----------|-----------|--------|
+
+- [ ] Minhas denúncias| Framework | Flutter | 3.9.0+ |
+
+- [ ] Histórico de atividades| Linguagem | Dart | 3.9.0+ |
+
+- [ ] Gamificação (pontos, badges)| State Management | Riverpod | 2.5.1 |
+
+| HTTP Client | Dio | 5.4.0 |
+
+### ⚪ Fase 5 - Melhorias| Navegação | GoRouter | 13.0.0 |
+
+- [ ] Testes unitários e de integração| Persistência | FlutterSecureStorage | 9.0.0 |
+
+- [ ] CI/CD pipeline| Mapas | Google Maps Flutter | 2.5.3 |
+
+- [ ] Analytics| Localização | Geolocator | 11.0.0 |
+
+- [ ] Otimizações de performance| Geocoding | Geocoding | 3.0.0 |
+
+
+
+------
+
+
+
+## 🤝 Contribuindo## 📈 Estatísticas do Projeto
+
+
+
+Contribuições são bem-vindas! Para contribuir:```
+
+📁 Features Completas:    1/5 (20%)
+
+1. Leia [GUIA-FLUTTER.MD](GUIA-FLUTTER.MD) para entender os padrões de código📄 Telas Implementadas:   10/35 (29%)
+
+2. Leia [DOCUMENTACAO_COMPLETA.md](DOCUMENTACAO_COMPLETA.md) para contexto do projeto📝 Linhas de Código:      ~5.000
+
+3. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)🔌 Endpoints Integrados:  8
+
+4. Commit suas mudanças (`git commit -m 'Add: MinhaFeature'`)🧪 Cobertura de Testes:   0%
+
+5. Push para a branch (`git push origin feature/MinhaFeature`)🐛 Bugs Conhecidos:       0
+
+6. Abra um Pull Request```
+
+
+
+------
+
+
+
+## 👥 Autores## 🗺️ Roadmap
+
+
+
+- **Bruno Ruan** - [@eibrunoruan](https://github.com/eibrunoruan)### ✅ Fase 1 - Autenticação (Concluída)
+
+- [x] Sistema completo de autenticação
+
+---- [x] Infraestrutura base (Dio, Router, Storage)
+
+- [x] Design system e componentes reutilizáveis
+
+## 📄 Licença
+
+### 🟡 Fase 2 - Home & Navegação (Em Andamento)
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.- [x] Integração Google Maps
+
+- [x] Bottom Navigation
+
+---- [x] Cards de denúncias
+
+- [ ] Criação de denúncia completa
+
+## 📞 Contato e Suporte- [ ] Marcadores no mapa
+
+- [ ] Filtros e pesquisa
+
+- 📧 Email: [contato@vozdopovo.com](mailto:contato@vozdopovo.com)
+
+- 🐛 Issues: [GitHub Issues](https://github.com/eibrunoruan/VOZ_APP/issues)### ⚪ Fase 3 - Gestão de Denúncias
+
+- 📖 Wiki: [GitHub Wiki](https://github.com/eibrunoruan/VOZ_APP/wiki)- [ ] CRUD completo de denúncias
+
+- [ ] Upload de múltiplas fotos
+
+---- [ ] Sistema de comentários
+
+- [ ] Notificações push
+
+<div align="center">- [ ] Acompanhamento de status
+
+
+
+**Desenvolvido com ❤️ usando Flutter**### ⚪ Fase 4 - Perfil & Social
+
+- [ ] Perfil do usuário
+
+⭐ Se este projeto te ajudou, considere dar uma estrela!- [ ] Minhas denúncias
+
+- [ ] Histórico de atividades
+
+</div>- [ ] Gamificação (pontos, badges)
+
+
+### ⚪ Fase 5 - Melhorias
+- [ ] Testes unitários e de integração
+- [ ] CI/CD pipeline
+- [ ] Analytics
+- [ ] Otimizações de performance
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Leia [GUIA-FLUTTER.MD](GUIA-FLUTTER.MD) para entender os padrões de código
+2. Leia [DOCUMENTACAO_COMPLETA.md](DOCUMENTACAO_COMPLETA.md) para contexto do projeto
+3. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
+4. Commit suas mudanças (`git commit -m 'Add: MinhaFeature'`)
+5. Push para a branch (`git push origin feature/MinhaFeature`)
+6. Abra um Pull Request
+
+---
+
+## 👥 Autores
+
+- **Bruno Ruan** - [@eibrunoruan](https://github.com/eibrunoruan)
+
+---
+
+## � Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## � Contato e Suporte
+
+- � Email: [contato@vozdopovo.com](mailto:contato@vozdopovo.com)
+- � Issues: [GitHub Issues](https://github.com/eibrunoruan/VOZ_APP/issues)
+- 📖 Wiki: [GitHub Wiki](https://github.com/eibrunoruan/VOZ_APP/wiki)
+
+---
+
+<div align="center">
+
+**Desenvolvido com ❤️ usando Flutter**
+
+⭐ Se este projeto te ajudou, considere dar uma estrela!
+
+</div>
 
     ```bash
 
