@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../../../core/exceptions/auth_exceptions.dart';
 
@@ -94,22 +95,35 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: const Row(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+          ),
+          title: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 30),
-              SizedBox(width: 12),
-              Text('Senha Redefinida!'),
+              Icon(Icons.check_circle, color: Colors.green, size: 28),
+              const SizedBox(width: AppSizes.spacing12),
+              const Text(
+                'Senha Redefinida!',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.black,
+                ),
+              ),
             ],
           ),
           content: const Text(
             'Sua senha foi alterada com sucesso. Faça login com sua nova senha.',
+            style: TextStyle(fontSize: 16, color: AppColors.black),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                context.go('/login');
-              },
-              child: const Text('Fazer Login'),
+            ElevatedButton(
+              onPressed: () => context.go('/login'),
+              style: AppButtonStyles.primary,
+              child: const Text(
+                'Fazer Login',
+                style: TextStyle(color: AppColors.white),
+              ),
             ),
           ],
         ),
@@ -142,72 +156,142 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nova Senha'), centerTitle: true),
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSizes.spacing24),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 20),
+                // Header com botão voltar
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.black,
+                      ),
+                      onPressed: () => context.pop(),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
 
-                // Header
-                const Icon(Icons.lock_reset, size: 80, color: Colors.green),
-                const SizedBox(height: 24),
-                const Text(
-                  'Defina sua Nova Senha',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+                const SizedBox(height: AppSizes.spacing24),
+
+                // Ícone
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: const Icon(
+                    Icons.lock_reset,
+                    size: 56,
+                    color: AppColors.white,
+                  ),
                 ),
-                const SizedBox(height: 8),
+
+                const SizedBox(height: AppSizes.spacing24),
+
+                // Título
                 Text(
-                  'Para: ${widget.email}',
-                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  'Nova Senha',
+                  style: AppTextStyles.titleMedium.copyWith(
+                    fontSize: 28,
+                    color: AppColors.black,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing8),
+
+                // Subtítulo
+                Text(
+                  widget.email,
+                  style: AppTextStyles.subtitle.copyWith(color: AppColors.grey),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 40),
+
+                const SizedBox(height: AppSizes.spacing40),
 
                 // Error message
                 if (_errorMessage != null)
                   Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 20),
+                    padding: const EdgeInsets.all(AppSizes.spacing16),
+                    margin: const EdgeInsets.only(bottom: AppSizes.spacing24),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.shade200),
+                      color: AppColors.error.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      border: Border.all(
+                        color: AppColors.error.withOpacity(0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red.shade700),
-                        const SizedBox(width: 12),
+                        const Icon(Icons.error_outline, color: AppColors.error),
+                        const SizedBox(width: AppSizes.spacing12),
                         Expanded(
                           child: Text(
                             _errorMessage!,
-                            style: TextStyle(color: Colors.red.shade700),
+                            style: AppTextStyles.body.copyWith(
+                              color: AppColors.error,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                // Password field
+                // Nova Senha
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Nova Senha',
                     hintText: 'Digite sua nova senha',
-                    prefixIcon: const Icon(Icons.lock),
-                    border: const OutlineInputBorder(),
-                    helperText:
-                        'Mínimo 8 caracteres com maiúscula, minúscula e número',
+                    prefixIcon: const Icon(Icons.lock, color: AppColors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.grey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryRed,
+                        width: 2,
+                      ),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.error),
+                    ),
+                    helperText: 'Mínimo 8 caracteres, letra maiúscula e número',
+                    helperStyle: AppTextStyles.body.copyWith(
+                      fontSize: 12,
+                      color: AppColors.grey,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColors.grey,
                       ),
                       onPressed: () {
                         setState(() {
@@ -220,28 +304,59 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                   textInputAction: TextInputAction.next,
                   enabled: !_isLoading,
                   validator: _validatePassword,
+                  style: AppTextStyles.body,
                   onChanged: (_) {
-                    // Revalidar confirm password quando password mudar
                     if (_confirmPasswordController.text.isNotEmpty) {
                       _formKey.currentState!.validate();
                     }
                   },
                 ),
-                const SizedBox(height: 16),
 
-                // Confirm Password field
+                const SizedBox(height: AppSizes.spacing16),
+
+                // Confirmar Senha
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: InputDecoration(
                     labelText: 'Confirmar Senha',
                     hintText: 'Digite sua senha novamente',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(
+                      Icons.lock_outline,
+                      color: AppColors.grey,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.grey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryRed,
+                        width: 2,
+                      ),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.error),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureConfirmPassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColors.grey,
                       ),
                       onPressed: () {
                         setState(() {
@@ -254,59 +369,56 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                   textInputAction: TextInputAction.done,
                   enabled: !_isLoading,
                   validator: _validateConfirmPassword,
+                  style: AppTextStyles.body,
                   onFieldSubmitted: (_) => _handleSetPassword(),
                 ),
-                const SizedBox(height: 32),
 
-                // Submit button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSetPassword,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                const SizedBox(height: AppSizes.spacing32),
+
+                // Botão Redefinir
+                SizedBox(
+                  width: double.infinity,
+                  height: AppSizes.buttonHeight,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSetPassword,
+                    style: AppButtonStyles.primary,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.white,
                             ),
-                          ),
-                        )
-                      : const Text(
-                          'Redefinir Senha',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                          )
+                        : Text('Redefinir Senha', style: AppTextStyles.button),
+                  ),
                 ),
-                const SizedBox(height: 24),
+
+                const SizedBox(height: AppSizes.spacing24),
 
                 // Info box
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSizes.spacing16),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.shade200),
+                    color: AppColors.greyLight,
+                    borderRadius: BorderRadius.circular(AppSizes.borderRadius),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.check_circle_outline,
-                        color: Colors.green.shade700,
+                        color: AppColors.grey,
+                        size: 20,
                       ),
-                      const SizedBox(width: 12),
-                      const Expanded(
+                      const SizedBox(width: AppSizes.spacing12),
+                      Expanded(
                         child: Text(
-                          'Seu código foi validado com sucesso! Agora defina uma senha forte.',
-                          style: TextStyle(fontSize: 14),
+                          'Código validado! Defina uma senha forte para sua conta.',
+                          style: AppTextStyles.body.copyWith(
+                            fontSize: 13,
+                            color: AppColors.grey,
+                          ),
                         ),
                       ),
                     ],

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/exceptions/auth_exceptions.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../notifiers/auth_notifier.dart';
-import '../../../../core/exceptions/auth_exceptions.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../widgets/widgets.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -17,9 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-
   bool _isLoading = false;
-  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -28,105 +27,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  String? _validateUsername(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Nome de usuário é obrigatório';
-    }
-    return null;
-  }
+  String? _validateUsername(String? value) =>
+      (value == null || value.isEmpty) ? 'Nome de usuário é obrigatório' : null;
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Senha é obrigatória';
-    }
-    return null;
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.error_outline, color: AppColors.primaryRed, size: 28),
-            const SizedBox(width: AppSizes.spacing12),
-            const Text(
-              'Erro',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.black,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(fontSize: 16, color: AppColors.black),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: AppButtonStyles.text,
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+  String? _validatePassword(String? value) =>
+      (value == null || value.isEmpty) ? 'Senha é obrigatória' : null;
 
   Future<void> _handleLogin() async {
-    // Validate form
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final repository = ref.read(authRepositoryProvider);
-
-      await repository.login(
-        _usernameController.text.trim(),
-        _passwordController.text,
-      );
+      await ref
+          .read(authRepositoryProvider)
+          .login(_usernameController.text.trim(), _passwordController.text);
 
       if (!mounted) return;
-
-      // IMPORTANTE: Atualizar o estado de autenticação
       ref.read(authNotifierProvider.notifier).login();
-
-      // Navigate to home screen after successful login
       context.go('/home');
     } on EmailNotVerifiedException {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showErrorDialog(
+      AuthErrorDialog.show(
+        context,
         'Email não verificado. Verifique seu email antes de fazer login.',
       );
     } on InvalidCredentialsException catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showErrorDialog(
+      AuthErrorDialog.show(
+        context,
         e.message.isNotEmpty ? e.message : 'Usuário ou senha incorretos',
       );
     } on NetworkException {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showErrorDialog('Erro de conexão. Verifique sua internet');
+      AuthErrorDialog.show(context, 'Erro de conexão. Verifique sua internet');
     } on UnknownAuthException catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showErrorDialog(e.message);
+      AuthErrorDialog.show(context, e.message);
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showErrorDialog('Erro inesperado. Tente novamente');
+      AuthErrorDialog.show(context, 'Erro inesperado. Tente novamente');
     }
   }
 
@@ -145,72 +90,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Botão voltar
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        onPressed: () => context.go('/'),
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          size: AppSizes.iconSizeButton,
-                        ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
+                    // Header
+                    AuthHeader(
+                      title: 'Login',
+                      subtitle: 'Entre com suas credenciais',
+                      onBack: () => context.go('/'),
                     ),
 
                     const SizedBox(height: AppSizes.spacing40),
-
-                    // Título
-                    const Text('Login', style: AppTextStyles.titleMedium),
-                    const SizedBox(height: AppSizes.spacing8),
-                    const Text(
-                      'Entre com suas credenciais',
-                      style: AppTextStyles.subtitle,
-                    ),
-
-                    const SizedBox(height: AppSizes.spacing40),
-
-                    // Label Nome de Usuário
-                    const Text('Nome de Usuário', style: AppTextStyles.label),
-                    const SizedBox(height: AppSizes.spacing8),
 
                     // Campo Nome de Usuário
-                    TextFormField(
+                    AuthFormField(
                       controller: _usernameController,
-                      decoration: AppInputDecoration.standard(
-                        hintText: 'Digite seu nome de usuário',
-                      ),
+                      label: 'Nome de Usuário',
+                      hintText: 'Digite seu nome de usuário',
                       textInputAction: TextInputAction.next,
                       enabled: !_isLoading,
                       validator: _validateUsername,
                     ),
+
                     const SizedBox(height: AppSizes.spacing20),
 
-                    // Label Senha
-                    const Text('Senha', style: AppTextStyles.label),
-                    const SizedBox(height: AppSizes.spacing8),
-
                     // Campo Senha
-                    TextFormField(
+                    AuthPasswordField(
                       controller: _passwordController,
-                      decoration: AppInputDecoration.standard(
-                        hintText: 'Digite sua senha',
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: AppColors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
-                      obscureText: _obscurePassword,
+                      label: 'Senha',
+                      hintText: 'Digite sua senha',
                       textInputAction: TextInputAction.done,
                       enabled: !_isLoading,
                       validator: _validatePassword,
@@ -232,30 +137,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: AppSizes.spacing8),
 
                     // Botão Entrar
-                    SizedBox(
-                      height: AppSizes.buttonHeight,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleLogin,
-                        style: AppButtonStyles.primary.copyWith(
-                          backgroundColor: WidgetStateProperty.resolveWith(
-                            (states) => states.contains(WidgetState.disabled)
-                                ? AppColors.primaryRed.withOpacity(0.6)
-                                : AppColors.primaryRed,
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.white,
-                                  ),
-                                ),
-                              )
-                            : const Text('Entrar'),
-                      ),
+                    AuthLoadingButton(
+                      onPressed: _handleLogin,
+                      text: 'Entrar',
+                      isLoading: _isLoading,
                     ),
 
                     const SizedBox(height: AppSizes.spacing24),

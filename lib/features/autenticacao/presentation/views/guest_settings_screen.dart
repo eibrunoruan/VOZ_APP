@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/confirmation_bottom_sheet.dart';
 import '../notifiers/auth_notifier.dart';
 
 class GuestSettingsScreen extends ConsumerStatefulWidget {
@@ -45,6 +47,44 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
     return null;
   }
 
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: AppColors.error, size: 28),
+            const SizedBox(width: AppSizes.spacing12),
+            const Text(
+              'Erro',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 16, color: AppColors.black),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'OK',
+              style: AppTextStyles.button.copyWith(color: AppColors.primaryRed),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleUpdate() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -72,45 +112,28 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
       // Volta para a tela anterior
       context.pop();
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao atualizar apelido: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-
       setState(() {
         _isLoading = false;
       });
+
+      if (!mounted) return;
+
+      _showErrorDialog('Erro ao atualizar apelido: $e');
     }
   }
 
-  Future<void> _handleCreateAccount() async {
-    final confirm = await showDialog<bool>(
+  Future<void> _showCreateAccountModal() async {
+    final confirm = await ConfirmationBottomSheet.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Criar Conta'),
-        content: const Text(
-          'Ao criar uma conta, você terá acesso a recursos completos como:\n\n'
-          '• Editar e excluir suas denúncias\n'
-          '• Acompanhar suas denúncias\n'
-          '• Receber notificações\n'
-          '• Perfil personalizado\n\n'
-          'Deseja continuar?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Criar Conta'),
-          ),
-        ],
-      ),
+      title: 'Criar Conta Completa',
+      message:
+          'Tenha acesso a recursos exclusivos como editar denúncias, '
+          'acompanhar status, receber notificações e perfil personalizado.',
+      icon: Icons.person_add,
+      iconColor: AppColors.primaryRed,
+      confirmText: 'Criar Conta',
+      cancelText: 'Agora Não',
+      isDanger: false,
     );
 
     if (confirm == true && mounted) {
@@ -118,233 +141,221 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
     }
   }
 
-  Future<void> _handleClearSession() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sair do Modo Visitante'),
-        content: const Text(
-          'Tem certeza que deseja sair?\n\n'
-          'Seu apelido será removido, mas você poderá entrar como visitante novamente depois.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true && mounted) {
-      await ref.read(authNotifierProvider.notifier).logout();
-      if (mounted) {
-        context.go('/');
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
+    final displayName = authState.guestNickname ?? 'Visitante';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Configurações de Visitante'),
-        centerTitle: true,
-      ),
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSizes.spacing24),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 20),
+                // Header com botão voltar
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.black,
+                      ),
+                      onPressed: () => context.pop(),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
 
-                // Status Badge
+                const SizedBox(height: AppSizes.spacing24),
+
+                // Ícone de visitante
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.shade200),
+                    color: AppColors.primaryRed,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: const Icon(
+                    Icons.person_outline,
+                    size: 56,
+                    color: AppColors.white,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing24),
+
+                // Título
+                Text(
+                  'Editar Apelido',
+                  style: AppTextStyles.titleMedium.copyWith(
+                    fontSize: 28,
+                    color: AppColors.black,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing8),
+
+                // Subtítulo
+                Text(
+                  'Seu apelido atual: $displayName',
+                  style: AppTextStyles.subtitle.copyWith(color: AppColors.grey),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: AppSizes.spacing40),
+
+                // Campo de apelido
+                TextFormField(
+                  controller: _nicknameController,
+                  decoration: InputDecoration(
+                    labelText: 'Novo Apelido',
+                    hintText: 'Digite seu novo apelido',
+                    prefixIcon: const Icon(
+                      Icons.badge_outlined,
+                      color: AppColors.grey,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.grey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryRed,
+                        width: 2,
+                      ),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
+                      borderSide: const BorderSide(color: AppColors.error),
+                    ),
+                    helperText: '3 a 20 caracteres',
+                    helperStyle: AppTextStyles.body.copyWith(
+                      fontSize: 12,
+                      color: AppColors.grey,
+                    ),
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                  enabled: !_isLoading,
+                  validator: _validateNickname,
+                  style: AppTextStyles.body,
+                ),
+
+                const SizedBox(height: AppSizes.spacing32),
+
+                // Botão Salvar
+                SizedBox(
+                  width: double.infinity,
+                  height: AppSizes.buttonHeight,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleUpdate,
+                    style: AppButtonStyles.primary,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.white,
+                            ),
+                          )
+                        : Text(
+                            'Salvar Alterações',
+                            style: AppTextStyles.button,
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing16),
+
+                // Divisor "ou"
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Divider(color: AppColors.grey, thickness: 1),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.spacing12,
+                      ),
+                      child: Text(
+                        'ou',
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.grey,
+                        ),
+                      ),
+                    ),
+                    const Expanded(
+                      child: Divider(color: AppColors.grey, thickness: 1),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: AppSizes.spacing16),
+
+                // Botão Criar Conta
+                SizedBox(
+                  width: double.infinity,
+                  height: AppSizes.buttonHeight,
+                  child: OutlinedButton(
+                    onPressed: () => _showCreateAccountModal(),
+                    style: AppButtonStyles.secondary,
+                    child: Text(
+                      'Criar Conta Completa',
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.primaryRed,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing32),
+
+                // Info card
+                Container(
+                  padding: const EdgeInsets.all(AppSizes.spacing16),
+                  decoration: BoxDecoration(
+                    color: AppColors.greyLight,
+                    borderRadius: BorderRadius.circular(AppSizes.borderRadius),
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.person_outline,
-                        color: Colors.blue.shade700,
-                        size: 40,
+                      const Icon(
+                        Icons.info_outline,
+                        color: AppColors.grey,
+                        size: 20,
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: AppSizes.spacing12),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Modo Visitante',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              authState.guestNickname ?? 'Sem apelido',
-                              style: TextStyle(
-                                color: Colors.grey.shade700,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          'Seus dados estão salvos de forma segura no dispositivo.',
+                          style: AppTextStyles.body.copyWith(
+                            fontSize: 13,
+                            color: AppColors.grey,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
 
-                // Section: Apelido
-                const Text(
-                  'Seu Apelido',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Este nome será exibido nas suas denúncias e comentários',
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-
-                // Nickname field
-                TextFormField(
-                  controller: _nicknameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Apelido',
-                    hintText: 'Digite seu apelido',
-                    prefixIcon: Icon(Icons.badge_outlined),
-                    border: OutlineInputBorder(),
-                    helperText: '3 a 20 caracteres',
-                  ),
-                  textCapitalization: TextCapitalization.words,
-                  enabled: !_isLoading,
-                  validator: _validateNickname,
-                ),
-                const SizedBox(height: 16),
-
-                // Update button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleUpdate,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Atualizar Apelido'),
-                ),
-                const SizedBox(height: 32),
-
-                const Divider(),
-                const SizedBox(height: 16),
-
-                // Section: Upgrade
-                const Text(
-                  'Quer Mais Recursos?',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-
-                // Create account card
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.star, color: Colors.amber.shade700),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Crie uma Conta Completa',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          '• Editar e excluir suas denúncias\n'
-                          '• Acompanhar o status das suas denúncias\n'
-                          '• Receber notificações de atualizações\n'
-                          '• Perfil personalizado\n'
-                          '• Histórico completo',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: _handleCreateAccount,
-                          icon: const Icon(Icons.person_add),
-                          label: const Text('Criar Conta Grátis'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                const Divider(),
-                const SizedBox(height: 16),
-
-                // Section: Sair
-                const Text(
-                  'Sessão',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-
-                // Clear session button
-                OutlinedButton.icon(
-                  onPressed: _handleClearSession,
-                  icon: const Icon(Icons.exit_to_app, color: Colors.red),
-                  label: const Text(
-                    'Sair do Modo Visitante',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: Colors.red),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Info text
-                Text(
-                  'Seus dados estão salvos no dispositivo de forma segura e permanente.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                const SizedBox(height: AppSizes.spacing24),
               ],
             ),
           ),

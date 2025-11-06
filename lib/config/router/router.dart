@@ -11,8 +11,13 @@ import '../../features/autenticacao/presentation/views/set_new_password_screen.d
 import '../../features/autenticacao/presentation/views/reset_password_screen.dart';
 import '../../features/autenticacao/presentation/views/guest_profile_screen.dart';
 import '../../features/autenticacao/presentation/views/guest_settings_screen.dart';
-import '../../features/home/presentation/views/home_screen.dart';
 import '../../features/denuncias/presentation/views/create_denuncia_screen.dart';
+import '../../features/denuncias/presentation/views/denuncias_list_screen.dart';
+import '../../features/navegacao/presentation/pages/home_page_new.dart';
+import '../../features/navegacao/presentation/pages/map_page.dart';
+import '../../features/navegacao/presentation/pages/settings_page.dart';
+import '../../features/navegacao/presentation/widgets/main_scaffold.dart';
+import '../../features/perfil/presentation/pages/profile_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -117,11 +122,38 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/guest-settings',
         builder: (context, state) => const GuestSettingsScreen(),
       ),
-      GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+      GoRoute(
+        path: '/map',
+        builder: (context, state) =>
+            const MainScaffold(currentPath: '/map', child: MapPage()),
+      ),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) =>
+            const MainScaffold(currentPath: '/home', child: HomePageNew()),
+      ),
+      GoRoute(
+        path: '/denuncias',
+        builder: (context, state) => const MainScaffold(
+          currentPath: '/denuncias',
+          child: DenunciasListScreen(),
+        ),
+      ),
       GoRoute(
         path: '/create-denuncia',
         builder: (context, state) => const CreateDenunciaScreen(),
       ),
+      GoRoute(
+        path: '/perfil',
+        builder: (context, state) =>
+            const MainScaffold(currentPath: '/perfil', child: ProfilePage()),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) =>
+            const MainScaffold(currentPath: '/settings', child: SettingsPage()),
+      ),
+      // TODO: Adicionar rota para /mapa quando implementada
       // Adicione outras rotas aqui
     ],
     redirect: (context, state) {
@@ -144,12 +176,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Se tem acesso (logado ou visitante) e está tentando acessar tela de auth
-      // Redireciona para home (exceto forgot-password e reset-password)
+      // Redireciona para mapa
       if (hasAccess &&
           (state.matchedLocation == '/' ||
               state.matchedLocation == '/login' ||
               state.matchedLocation == '/register')) {
-        return '/home';
+        return '/map';
       }
 
       return null; // Não redireciona

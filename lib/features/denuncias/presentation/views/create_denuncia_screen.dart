@@ -103,7 +103,12 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
         _currentStep--;
       });
     } else {
-      context.pop();
+      // Se não há nada na pilha de navegação, volta para home
+      if (GoRouter.of(context).canPop()) {
+        context.pop();
+      } else {
+        context.go('/home');
+      }
     }
   }
 
