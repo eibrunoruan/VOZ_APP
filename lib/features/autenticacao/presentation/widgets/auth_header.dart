@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Cabeçalho padronizado para telas de autenticação
-/// Inclui botão voltar, título e subtítulo
+
 class AuthHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -21,7 +20,7 @@ class AuthHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Botão voltar
+
         Align(
           alignment: Alignment.centerLeft,
           child: IconButton(
@@ -33,10 +32,8 @@ class AuthHeader extends StatelessWidget {
         ),
         const SizedBox(height: AppSizes.spacing40),
 
-        // Título
         Text(title, style: AppTextStyles.titleMedium),
 
-        // Subtítulo (opcional)
         if (subtitle != null) ...[
           const SizedBox(height: AppSizes.spacing8),
           Text(subtitle!, style: AppTextStyles.subtitle),

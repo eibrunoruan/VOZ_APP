@@ -23,33 +23,27 @@ class AuthRepository {
     }
   }
 
-  /// Registra novo usuário (retorna user com is_active: false)
   Future<User> register(RegisterRequest request) async {
     final user = await _datasource.register(request);
     return user;
   }
 
-  /// Verifica email com código
   Future<void> verifyEmail(String email, String code) async {
     await _datasource.verifyEmail(email, code);
   }
 
-  /// Reenvia código de verificação
   Future<void> resendVerificationCode(String email) async {
     await _datasource.resendVerificationCode(email);
   }
 
-  /// Solicita reset de senha
   Future<void> requestPasswordReset(String email) async {
     await _datasource.requestPasswordReset(email);
   }
 
-  /// Valida código de reset de senha
   Future<void> validatePasswordResetCode(String email, String code) async {
     await _datasource.validatePasswordResetCode(email, code);
   }
 
-  /// Confirma reset de senha
   Future<void> confirmPasswordReset(
     String email,
     String code,

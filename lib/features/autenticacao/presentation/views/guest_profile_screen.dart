@@ -32,7 +32,7 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
     if (value.trim().length > 20) {
       return 'Apelido deve ter no máximo 20 caracteres';
     }
-    // Permite apenas letras, números, espaços e alguns caracteres especiais
+
     if (!RegExp(r'^[a-zA-Z0-9\s._-]+$').hasMatch(value)) {
       return 'Apelido contém caracteres inválidos';
     }
@@ -51,12 +51,10 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
     try {
       final nickname = _nicknameController.text.trim();
 
-      // Salva o apelido e marca como convidado
       await ref.read(authNotifierProvider.notifier).enterAsGuest(nickname);
 
       if (!mounted) return;
 
-      // Navega para a home
       context.go('/home');
     } catch (e) {
       if (!mounted) return;
@@ -79,7 +77,7 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Padding(
@@ -89,9 +87,12 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Botão Voltar
+
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: AppColors.black),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: AppColors.navbarText,
+                    ),
                     onPressed: () => context.go('/'),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -99,7 +100,6 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
 
                   const SizedBox(height: AppSizes.spacing32),
 
-                  // Título
                   const Text(
                     'Modo Visitante',
                     style: AppTextStyles.titleMedium,
@@ -107,7 +107,6 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
 
                   const SizedBox(height: AppSizes.spacing8),
 
-                  // Subtítulo
                   const Text(
                     'Escolha um apelido para identificar suas denúncias e comentários',
                     style: AppTextStyles.subtitle,
@@ -115,13 +114,15 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
 
                   const SizedBox(height: AppSizes.spacing40),
 
-                  // Label Apelido
                   const Text('Apelido', style: AppTextStyles.label),
                   const SizedBox(height: AppSizes.spacing8),
 
-                  // Campo Apelido
                   TextFormField(
                     controller: _nicknameController,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.white,
+                    ),
                     decoration: AppInputDecoration.standard(
                       hintText: 'Ex: Cidadão Anônimo',
                     ),
@@ -135,10 +136,9 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
 
                   const Spacer(),
 
-                  // Botões fixados na parte inferior
                   Column(
                     children: [
-                      // Botão Continuar
+
                       SizedBox(
                         width: double.infinity,
                         height: AppSizes.buttonHeight,
@@ -168,7 +168,6 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
 
                       const SizedBox(height: AppSizes.spacing16),
 
-                      // Link para Criar Conta
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -176,7 +175,7 @@ class _GuestProfileScreenState extends ConsumerState<GuestProfileScreen> {
                             'Quer acesso completo? ',
                             style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.black,
+                              color: AppColors.navbarText,
                             ),
                           ),
                           TextButton(

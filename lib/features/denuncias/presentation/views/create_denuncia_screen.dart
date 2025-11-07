@@ -20,34 +20,26 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
   int _currentStep = 0;
   final int _totalSteps = 5; // Aumentado para 5 etapas
 
-  // Controllers para cada etapa
   final _tituloController = TextEditingController();
   final _descricaoController = TextEditingController();
   final _localizacaoController = TextEditingController();
 
-  // Categoria selecionada
   String? _categoriaSelecionada;
 
-  // Localização (lat/lng)
   double? _selectedLat;
   double? _selectedLng;
 
-  // Fotos selecionadas (simulação)
   final List<String> _selectedPhotos = [];
 
-  // Google Maps Controller
   GoogleMapController? _mapController;
   final Set<Marker> _markers = {};
 
-  // Localização inicial (São Paulo)
   static const LatLng _initialPosition = LatLng(-23.5505, -46.6333);
 
-  // Estado do mapa
   bool _mapError = false;
   bool _loadingLocation = false;
   bool _locationLoaded = false;
 
-  // Lista de categorias
   final List<Map<String, dynamic>> _categorias = [
     {'nome': 'Infraestrutura', 'icon': Icons.construction},
     {'nome': 'Saúde', 'icon': Icons.local_hospital},
@@ -70,7 +62,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
 
   void _nextStep() {
     if (_currentStep < _totalSteps - 1) {
-      // Validação básica de cada etapa
+
       if (_currentStep == 0 && _tituloController.text.trim().isEmpty) {
         _showErrorDialog('Digite um título para a denúncia');
         return;
@@ -92,7 +84,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
         _currentStep++;
       });
     } else {
-      // Último passo - criar denúncia
+
       _handleCreateDenuncia();
     }
   }
@@ -103,7 +95,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
         _currentStep--;
       });
     } else {
-      // Se não há nada na pilha de navegação, volta para home
+
       if (GoRouter.of(context).canPop()) {
         context.pop();
       } else {
@@ -151,7 +143,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
   }
 
   void _handleCreateDenuncia() {
-    // Cria a denúncia e adiciona ao provider
+
     final denuncia = DenunciaModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       titulo: _tituloController.text,
@@ -166,18 +158,16 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
 
     ref.read(denunciasProvider.notifier).addDenuncia(denuncia);
 
-    // Volta para home
     context.go('/home');
   }
 
-  // Método para obter localização atual
   Future<void> _getCurrentLocation() async {
     setState(() {
       _loadingLocation = true;
     });
 
     try {
-      // Verifica se o serviço de localização está habilitado
+
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         _showErrorDialog(
@@ -186,7 +176,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
         return;
       }
 
-      // Verifica permissões
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -203,7 +192,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
         return;
       }
 
-      // Mostra loading
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -225,7 +213,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
         ),
       );
 
-      // Obtém posição atual
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 10),
@@ -238,17 +225,14 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
         _selectedLng = position.longitude;
       });
 
-      // Move câmera para localização (se mapa estiver disponível)
       if (_mapController != null && !_mapError) {
         _mapController?.animateCamera(
           CameraUpdate.newLatLng(LatLng(position.latitude, position.longitude)),
         );
       }
 
-      // Adiciona marker
       _addMarker(LatLng(position.latitude, position.longitude));
 
-      // Obtém endereço
       await _getAddressFromLatLng(position.latitude, position.longitude);
 
       setState(() {
@@ -291,7 +275,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     }
   }
 
-  // Método para adicionar marker no mapa
   void _addMarker(LatLng position) {
     setState(() {
       _markers.clear();
@@ -305,7 +288,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     });
   }
 
-  // Método para converter coordenadas em endereço
   Future<void> _getAddressFromLatLng(double lat, double lng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
@@ -348,7 +330,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     }
   }
 
-  // Método quando toca no mapa
   void _onMapTap(LatLng position) {
     setState(() {
       _selectedLat = position.latitude;
@@ -359,7 +340,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     _getAddressFromLatLng(position.latitude, position.longitude);
   }
 
-  // Widget de erro do mapa
   Widget _buildMapErrorWidget() {
     return Container(
       decoration: BoxDecoration(
@@ -396,7 +376,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
                 const SizedBox(height: AppSizes.spacing16),
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Permite selecionar localização manualmente
+
                     setState(() {
                       _selectedLat = _initialPosition.latitude;
                       _selectedLng = _initialPosition.longitude;
@@ -423,50 +403,48 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppSizes.spacing24),
             child: Column(
               children: [
-                // Cabeçalho com botão voltar
+
                 Row(
                   children: [
                     IconButton(
                       onPressed: _previousStep,
                       icon: const Icon(Icons.arrow_back),
-                      color: AppColors.black,
+                      color: AppColors.navbarText,
                     ),
                     const SizedBox(width: AppSizes.spacing8),
                     Text(
                       'Nova Denúncia',
-                      style: AppTextStyles.titleMedium.copyWith(fontSize: 20),
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontSize: 20,
+                        color: AppColors.navbarText,
+                      ),
                     ),
                   ],
                 ),
 
                 const SizedBox(height: AppSizes.spacing24),
 
-                // Indicador de progresso
                 _buildStepIndicator(),
 
                 const SizedBox(height: AppSizes.spacing32),
 
-                // Conteúdo da etapa atual
                 Expanded(
                   child: SingleChildScrollView(
-                    // Desabilita scroll na etapa do mapa para permitir manipulação do GoogleMap
-                    physics: _currentStep == 3
-                        ? const NeverScrollableScrollPhysics()
-                        : const AlwaysScrollableScrollPhysics(),
+
+                    physics: const AlwaysScrollableScrollPhysics(),
                     child: _buildStepContent(),
                   ),
                 ),
 
                 const SizedBox(height: AppSizes.spacing24),
 
-                // Botão de ação
                 SizedBox(
                   width: double.infinity,
                   height: AppSizes.buttonHeight,
@@ -526,31 +504,59 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     }
   }
 
-  // Etapa 1: Título
   Widget _buildTituloStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Qual o título da sua denúncia?',
-          style: AppTextStyles.titleMedium,
+          style: AppTextStyles.titleMedium.copyWith(
+            color: AppColors.navbarText,
+          ),
         ),
         const SizedBox(height: AppSizes.spacing8),
-        Text('Seja breve e direto', style: AppTextStyles.subtitle),
+        Text(
+          'Seja breve e direto',
+          style: AppTextStyles.subtitle.copyWith(color: AppColors.navbarText),
+        ),
         const SizedBox(height: AppSizes.spacing32),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Título', style: AppTextStyles.label),
+            Text(
+              'Título',
+              style: AppTextStyles.label.copyWith(color: AppColors.navbarText),
+            ),
             const SizedBox(height: AppSizes.spacing8),
             TextFormField(
               controller: _tituloController,
               autofocus: true,
               maxLength: 100,
-              decoration: AppInputDecoration.standard(
+              decoration: InputDecoration(
                 hintText: 'Ex: Buraco na rua principal',
+                hintStyle: TextStyle(color: AppColors.grey.withOpacity(0.5)),
+                filled: true,
+                fillColor: Colors.transparent,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: 1.5,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.spacing16,
+                  vertical: AppSizes.spacing12,
+                ),
               ),
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, color: AppColors.white),
               onFieldSubmitted: (_) => _nextStep(),
             ),
           ],
@@ -559,99 +565,129 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     );
   }
 
-  // Etapa 2: Categoria
   Widget _buildCategoriaStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Qual a categoria?', style: AppTextStyles.titleMedium),
+        Text(
+          'Qual a categoria?',
+          style: AppTextStyles.titleMedium.copyWith(
+            color: AppColors.navbarText,
+          ),
+        ),
         const SizedBox(height: AppSizes.spacing8),
         Text(
           'Selecione a categoria que melhor descreve sua denúncia',
-          style: AppTextStyles.subtitle,
+          style: AppTextStyles.subtitle.copyWith(color: AppColors.navbarText),
         ),
         const SizedBox(height: AppSizes.spacing32),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: AppSizes.spacing16,
-            mainAxisSpacing: AppSizes.spacing16,
-            childAspectRatio: 1.5,
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+            border: Border.all(color: AppColors.primaryRed, width: 1.5),
           ),
-          itemCount: _categorias.length,
-          itemBuilder: (context, index) {
-            final categoria = _categorias[index];
-            final isSelected = _categoriaSelecionada == categoria['nome'];
-            return InkWell(
-              onTap: () {
-                setState(() {
-                  _categoriaSelecionada = categoria['nome'];
-                });
-              },
-              borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryRed : AppColors.white,
-                  border: Border.all(
-                    color: isSelected ? AppColors.primaryRed : AppColors.black,
-                    width: isSelected ? 2 : 1,
-                  ),
-                  borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          child: DropdownButtonFormField<String>(
+            value: _categoriaSelecionada,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: AppSizes.spacing16,
+                vertical: AppSizes.spacing12,
+              ),
+              border: InputBorder.none,
+              filled: true,
+              fillColor: Colors.transparent,
+            ),
+            dropdownColor: AppColors.background,
+            hint: Text(
+              'Selecione uma categoria',
+              style: TextStyle(color: AppColors.grey.withOpacity(0.5)),
+            ),
+            icon: const Icon(
+              Icons.arrow_drop_down,
+              color: AppColors.primaryRed,
+            ),
+            style: const TextStyle(color: AppColors.white, fontSize: 16),
+            items: _categorias.map((categoria) {
+              return DropdownMenuItem<String>(
+                value: categoria['nome'],
+                child: Row(
                   children: [
                     Icon(
                       categoria['icon'],
-                      size: 32,
-                      color: isSelected ? AppColors.white : AppColors.black,
+                      color: AppColors.primaryRed,
+                      size: 20,
                     ),
-                    const SizedBox(height: AppSizes.spacing8),
-                    Text(
-                      categoria['nome'],
-                      style: AppTextStyles.label.copyWith(
-                        color: isSelected ? AppColors.white : AppColors.black,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    const SizedBox(width: AppSizes.spacing12),
+                    Text(categoria['nome']),
                   ],
                 ),
-              ),
-            );
-          },
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _categoriaSelecionada = value;
+              });
+            },
+          ),
         ),
       ],
     );
   }
 
-  // Etapa 3: Descrição
   Widget _buildDescricaoStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Descreva a situação', style: AppTextStyles.titleMedium),
+        Text(
+          'Descreva a situação',
+          style: AppTextStyles.titleMedium.copyWith(
+            color: AppColors.navbarText,
+          ),
+        ),
         const SizedBox(height: AppSizes.spacing8),
         Text(
           'Forneça o máximo de detalhes possível',
-          style: AppTextStyles.subtitle,
+          style: AppTextStyles.subtitle.copyWith(color: AppColors.navbarText),
         ),
         const SizedBox(height: AppSizes.spacing32),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Descrição', style: AppTextStyles.label),
+            Text(
+              'Descrição',
+              style: AppTextStyles.label.copyWith(color: AppColors.navbarText),
+            ),
             const SizedBox(height: AppSizes.spacing8),
             TextFormField(
               controller: _descricaoController,
               autofocus: true,
               maxLines: 8,
               maxLength: 500,
-              decoration: AppInputDecoration.standard(
+              decoration: InputDecoration(
                 hintText: 'Descreva com detalhes o problema...',
+                hintStyle: TextStyle(color: AppColors.grey.withOpacity(0.5)),
+                filled: true,
+                fillColor: Colors.transparent,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: 1.5,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSizes.spacing16,
+                  vertical: AppSizes.spacing12,
+                ),
               ),
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, color: AppColors.white),
             ),
           ],
         ),
@@ -659,28 +695,28 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     );
   }
 
-  // Etapa 4: Localização com Mapa
   Widget _buildLocalizacaoStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Onde está localizado o problema?',
-          style: AppTextStyles.titleMedium,
+          style: AppTextStyles.titleMedium.copyWith(
+            color: AppColors.navbarText,
+          ),
         ),
         const SizedBox(height: AppSizes.spacing8),
         Text(
           'Toque no mapa para marcar a localização',
-          style: AppTextStyles.subtitle,
+          style: AppTextStyles.subtitle.copyWith(color: AppColors.navbarText),
         ),
         const SizedBox(height: AppSizes.spacing24),
 
-        // Google Maps com tratamento de erro
         ClipRRect(
           borderRadius: BorderRadius.circular(AppSizes.borderRadius),
           child: SizedBox(
             width: double.infinity,
-            height: 400, // Altura maior para facilitar manipulação
+            height: 300, // Altura reduzida para dar espaço ao botão
             child: _mapError
                 ? _buildMapErrorWidget()
                 : GoogleMap(
@@ -695,7 +731,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
                           _mapError = false;
                           _locationLoaded = false;
                         });
-                        // Carrega automaticamente a localização do usuário
+
                         if (!_locationLoaded) {
                           _getCurrentLocation();
                         }
@@ -718,7 +754,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
 
         const SizedBox(height: AppSizes.spacing24),
 
-        // Botão para usar localização atual
         SizedBox(
           width: double.infinity,
           height: AppSizes.buttonHeight,
@@ -746,19 +781,44 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
 
         const SizedBox(height: AppSizes.spacing16),
 
-        // Campo de endereço (opcional)
         if (_selectedLat != null)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Endereço (opcional)', style: AppTextStyles.label),
+              Text(
+                'Endereço (opcional)',
+                style: AppTextStyles.label.copyWith(
+                  color: AppColors.navbarText,
+                ),
+              ),
               const SizedBox(height: AppSizes.spacing8),
               TextFormField(
                 controller: _localizacaoController,
-                decoration: AppInputDecoration.standard(
+                decoration: InputDecoration(
                   hintText: 'Ex: Rua Principal, 123',
+                  hintStyle: TextStyle(color: AppColors.grey.withOpacity(0.5)),
+                  filled: true,
+                  fillColor: Colors.transparent,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                    borderSide: const BorderSide(
+                      color: AppColors.primaryRed,
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                    borderSide: const BorderSide(
+                      color: AppColors.primaryRed,
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacing16,
+                    vertical: AppSizes.spacing12,
+                  ),
                 ),
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16, color: AppColors.white),
               ),
             ],
           ),
@@ -766,19 +826,25 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
     );
   }
 
-  // Etapa 5: Fotos
   Widget _buildFotosStep() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Adicione fotos do problema', style: AppTextStyles.titleMedium),
+        Text(
+          'Adicione fotos do problema',
+          style: AppTextStyles.titleMedium.copyWith(
+            color: AppColors.navbarText,
+          ),
+        ),
         const SizedBox(height: AppSizes.spacing8),
-        Text('Opcional - até 3 fotos', style: AppTextStyles.subtitle),
+        Text(
+          'Opcional - até 3 fotos',
+          style: AppTextStyles.subtitle.copyWith(color: AppColors.navbarText),
+        ),
         const SizedBox(height: AppSizes.spacing32),
 
-        // Grid de fotos
         if (_selectedPhotos.isEmpty)
-          // Botão para adicionar primeira foto
+
           GestureDetector(
             onTap: () {
               setState(() {
@@ -789,23 +855,23 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: AppColors.greyLight,
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-                border: Border.all(color: AppColors.grey, width: 1),
+                border: Border.all(color: AppColors.primaryRed, width: 1.5),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.add_a_photo_outlined,
+                  const Icon(
+                    Icons.add_circle_outline,
                     size: 64,
-                    color: AppColors.grey,
+                    color: AppColors.primaryRed,
                   ),
                   const SizedBox(height: AppSizes.spacing16),
                   Text(
                     'Adicionar fotos',
                     style: AppTextStyles.label.copyWith(
-                      color: AppColors.grey,
+                      color: AppColors.primaryRed,
                       fontSize: 16,
                     ),
                   ),
@@ -814,7 +880,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
             ),
           )
         else
-          // Grid com fotos selecionadas
+
           Column(
             children: [
               GridView.builder(
@@ -831,7 +897,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
                     (_selectedPhotos.length < 3 ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index < _selectedPhotos.length) {
-                    // Foto existente
+
                     return Stack(
                       children: [
                         Container(
@@ -866,7 +932,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
                             ),
                           ),
                         ),
-                        // Botão remover
+
                         Positioned(
                           top: 8,
                           right: 8,
@@ -893,7 +959,7 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
                       ],
                     );
                   } else {
-                    // Botão adicionar mais
+
                     return GestureDetector(
                       onTap: () {
                         if (_selectedPhotos.length < 3) {
@@ -906,25 +972,28 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: AppColors.greyLight,
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.circular(
                             AppSizes.borderRadius,
                           ),
                           border: Border.all(
-                            color: AppColors.grey,
-                            width: 1,
-                            style: BorderStyle.solid,
+                            color: AppColors.primaryRed,
+                            width: 1.5,
                           ),
                         ),
                         child: const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.add, size: 48, color: AppColors.grey),
+                            Icon(
+                              Icons.add_circle_outline,
+                              size: 48,
+                              color: AppColors.primaryRed,
+                            ),
                             SizedBox(height: AppSizes.spacing8),
                             Text(
                               'Adicionar',
                               style: TextStyle(
-                                color: AppColors.grey,
+                                color: AppColors.primaryRed,
                                 fontSize: 14,
                               ),
                             ),
@@ -938,7 +1007,6 @@ class _CreateDenunciaScreenState extends ConsumerState<CreateDenunciaScreen> {
 
               const SizedBox(height: AppSizes.spacing16),
 
-              // Informação
               Text(
                 '${_selectedPhotos.length}/3 fotos adicionadas',
                 style: AppTextStyles.label.copyWith(

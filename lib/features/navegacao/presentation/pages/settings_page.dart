@@ -12,9 +12,9 @@ class SettingsPage extends ConsumerWidget {
     final authNotifier = ref.read(authNotifierProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
           'Configurações',
@@ -28,7 +28,7 @@ class SettingsPage extends ConsumerWidget {
       ),
       body: ListView(
         children: [
-          // Seção de Conta
+
           _buildSectionHeader('Conta'),
           _buildSettingsTile(
             icon: Icons.person_outline,
@@ -39,7 +39,7 @@ class SettingsPage extends ConsumerWidget {
             icon: Icons.lock_outline,
             title: 'Alterar Senha',
             onTap: () {
-              // TODO: Implementar tela de alterar senha
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Em desenvolvimento')),
               );
@@ -47,7 +47,6 @@ class SettingsPage extends ConsumerWidget {
           ),
           const Divider(height: 32),
 
-          // Seção de Notificações
           _buildSectionHeader('Notificações'),
           _buildSettingsTile(
             icon: Icons.notifications_none,
@@ -55,7 +54,7 @@ class SettingsPage extends ConsumerWidget {
             trailing: Switch(
               value: true,
               onChanged: (value) {
-                // TODO: Implementar toggle de notificações
+
               },
               activeColor: AppColors.primaryRed,
             ),
@@ -63,13 +62,12 @@ class SettingsPage extends ConsumerWidget {
           ),
           const Divider(height: 32),
 
-          // Seção de Sobre
           _buildSectionHeader('Sobre'),
           _buildSettingsTile(
             icon: Icons.info_outline,
             title: 'Sobre o App',
             onTap: () {
-              // TODO: Implementar tela sobre o app
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Voz do Povo v1.0.0')),
               );
@@ -79,7 +77,7 @@ class SettingsPage extends ConsumerWidget {
             icon: Icons.privacy_tip,
             title: 'Política de Privacidade',
             onTap: () {
-              // TODO: Implementar tela de política de privacidade
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Em desenvolvimento')),
               );
@@ -89,7 +87,7 @@ class SettingsPage extends ConsumerWidget {
             icon: Icons.description,
             title: 'Termos de Uso',
             onTap: () {
-              // TODO: Implementar tela de termos de uso
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Em desenvolvimento')),
               );
@@ -97,24 +95,43 @@ class SettingsPage extends ConsumerWidget {
           ),
           const Divider(height: 32),
 
-          // Botão de Logout
           Padding(
             padding: const EdgeInsets.all(AppSizes.spacing16),
             child: SizedBox(
               height: AppSizes.buttonHeight,
-              child: ElevatedButton(
+              child: OutlinedButton(
                 onPressed: () async {
                   final shouldLogout = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Sair'),
+                      backgroundColor: AppColors.background,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSizes.borderRadius,
+                        ),
+                      ),
+                      title: const Text(
+                        'Sair',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navbarText,
+                        ),
+                      ),
                       content: const Text(
                         'Deseja realmente sair da sua conta?',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.navbarText,
+                        ),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancelar'),
+                          child: const Text(
+                            'Cancelar',
+                            style: TextStyle(color: AppColors.grey),
+                          ),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
@@ -134,9 +151,13 @@ class SettingsPage extends ConsumerWidget {
                     }
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryRed,
-                  foregroundColor: AppColors.white,
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: AppColors.primaryRed,
+                  side: const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: 1.5,
+                  ),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSizes.borderRadius),
@@ -144,7 +165,11 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 child: const Text(
                   'Sair da Conta',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryRed,
+                  ),
                 ),
               ),
             ),

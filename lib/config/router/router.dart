@@ -41,7 +41,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           final args = state.extra as Map<String, dynamic>?;
           final email = args?['email'] as String?;
 
-          // Redirect to home if no email provided
           if (email == null || email.isEmpty) {
             return '/';
           }
@@ -65,7 +64,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           final args = state.extra as Map<String, dynamic>?;
           final email = args?['email'] as String?;
 
-          // Redirect to forgot-password if no email provided
           if (email == null || email.isEmpty) {
             return '/forgot-password';
           }
@@ -85,7 +83,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           final email = args?['email'] as String?;
           final code = args?['code'] as String?;
 
-          // Redirect to forgot-password if no email or code provided
           if (email == null || email.isEmpty || code == null || code.isEmpty) {
             return '/forgot-password';
           }
@@ -105,7 +102,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           final args = state.extra as Map<String, dynamic>?;
           final email = args?['email'] as String?;
 
-          // Redirect to forgot-password if no email provided
           if (email == null || email.isEmpty) {
             return '/forgot-password';
           }
@@ -124,8 +120,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/map',
-        builder: (context, state) =>
-            const MainScaffold(currentPath: '/map', child: MapPage()),
+        builder: (context, state) {
+          final cityParam = state.uri.queryParameters['city'];
+          final latParam = state.uri.queryParameters['lat'];
+          final lngParam = state.uri.queryParameters['lng'];
+
+          final searchLat = latParam != null ? double.tryParse(latParam) : null;
+          final searchLng = lngParam != null ? double.tryParse(lngParam) : null;
+
+          return MainScaffold(
+            currentPath: '/map',
+            child: MapPage(
+              searchLat: searchLat,
+              searchLng: searchLng,
+              searchCity: cityParam,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: '/home',
@@ -153,8 +164,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             const MainScaffold(currentPath: '/settings', child: SettingsPage()),
       ),
-      // TODO: Adicionar rota para /mapa quando implementada
-      // Adicione outras rotas aqui
+
+
     ],
     redirect: (context, state) {
       final hasAccess = authState.hasAccess; // Logado OU visitante
@@ -169,14 +180,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == '/reset-password' ||
           state.matchedLocation == '/guest-profile';
 
-      // Se não tem acesso (nem logado, nem visitante) e não está em tela de auth
-      // Redireciona para WelcomeScreen
+
       if (!hasAccess && !isAuthScreen) {
         return '/';
       }
 
-      // Se tem acesso (logado ou visitante) e está tentando acessar tela de auth
-      // Redireciona para mapa
+
       if (hasAccess &&
           (state.matchedLocation == '/' ||
               state.matchedLocation == '/login' ||

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Dialog de erro padronizado para autenticação
 class AuthErrorDialog {
   static void show(BuildContext context, String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.borderRadius),
         ),
@@ -19,14 +19,14 @@ class AuthErrorDialog {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.black,
+                color: AppColors.navbarText,
               ),
             ),
           ],
         ),
         content: Text(
           message,
-          style: const TextStyle(fontSize: 16, color: AppColors.black),
+          style: const TextStyle(fontSize: 16, color: AppColors.navbarText),
         ),
         actions: [
           TextButton(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Botão primário com loading state para autenticação
 class AuthLoadingButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final String text;

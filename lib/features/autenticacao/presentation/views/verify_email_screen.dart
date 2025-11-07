@@ -26,12 +26,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
   bool _isLoading = false;
 
-  // Timer para reenvio
   int _resendTimer = 60;
   Timer? _resendTimerObj;
   bool _canResend = false;
 
-  // Timer para expiração do código
   int _expirationTimer = 300; // 5 minutos = 300 segundos
   Timer? _expirationTimerObj;
 
@@ -41,7 +39,6 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     _startResendTimer();
     _startExpirationTimer();
 
-    // Auto-focus no primeiro campo
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNodes[0].requestFocus();
     });
@@ -106,26 +103,27 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.borderRadius),
         ),
         title: Row(
           children: [
-            Icon(Icons.error_outline, color: AppColors.primaryRed, size: 28),
+            Icon(Icons.error_outline, color: AppColors.error, size: 28),
             const SizedBox(width: AppSizes.spacing12),
             const Text(
               'Erro',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.black,
+                color: AppColors.navbarText,
               ),
             ),
           ],
         ),
         content: Text(
           message,
-          style: const TextStyle(fontSize: 16, color: AppColors.black),
+          style: const TextStyle(fontSize: 16, color: AppColors.navbarText),
         ),
         actions: [
           TextButton(
@@ -162,7 +160,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
           .verifyEmail(widget.email, _getCode());
 
       if (mounted) {
-        // Sucesso! Navega para login
+
         context.go('/login');
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -183,7 +181,6 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
         _isLoading = false;
       });
 
-      // Limpa os campos
       for (var controller in _controllers) {
         controller.clear();
       }
@@ -245,7 +242,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Padding(
@@ -253,9 +250,12 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Botão Voltar
+
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: AppColors.black),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: AppColors.navbarText,
+                  ),
                   onPressed: () => context.go('/'),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -263,12 +263,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
                 const SizedBox(height: AppSizes.spacing32),
 
-                // Título
                 const Text('Verificar Email', style: AppTextStyles.titleMedium),
 
                 const SizedBox(height: AppSizes.spacing8),
 
-                // Subtítulo
                 const Text(
                   'Digite o código de 5 dígitos enviado para seu email',
                   style: AppTextStyles.subtitle,
@@ -276,7 +274,6 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
                 const SizedBox(height: AppSizes.spacing40),
 
-                // Campos de código
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(
@@ -293,19 +290,19 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.black,
+                          color: AppColors.white,
                         ),
                         decoration: InputDecoration(
                           counterText: '',
                           filled: true,
-                          fillColor: AppColors.greyLight,
+                          fillColor: Colors.transparent,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(
                               AppSizes.borderRadius,
                             ),
                             borderSide: const BorderSide(
-                              color: AppColors.black,
-                              width: 1,
+                              color: AppColors.primaryRed,
+                              width: 1.5,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -313,8 +310,8 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                               AppSizes.borderRadius,
                             ),
                             borderSide: const BorderSide(
-                              color: AppColors.black,
-                              width: 1,
+                              color: AppColors.primaryRed,
+                              width: 1.5,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -335,14 +332,13 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                         ],
                         onChanged: (value) {
                           if (value.isNotEmpty && index < 4) {
-                            // Avança para próximo campo
+
                             _focusNodes[index + 1].requestFocus();
                           } else if (value.isEmpty && index > 0) {
-                            // Volta para campo anterior ao apagar
+
                             _focusNodes[index - 1].requestFocus();
                           }
 
-                          // Auto-submit quando completo
                           if (_isCodeComplete()) {
                             _handleVerify();
                           }
@@ -354,7 +350,6 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
                 const SizedBox(height: AppSizes.spacing16),
 
-                // Cronômetro de expiração
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -383,10 +378,9 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
                 const Spacer(),
 
-                // Botões fixados na parte inferior
                 Column(
                   children: [
-                    // Botão Verificar
+
                     SizedBox(
                       width: double.infinity,
                       height: AppSizes.buttonHeight,
@@ -416,7 +410,6 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
                     const SizedBox(height: AppSizes.spacing16),
 
-                    // Reenviar código
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -424,7 +417,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                           'Não recebeu o código? ',
                           style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.black,
+                            color: AppColors.navbarText,
                           ),
                         ),
                         if (_canResend)

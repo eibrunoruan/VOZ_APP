@@ -51,6 +51,7 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.borderRadius),
         ),
@@ -63,14 +64,14 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.black,
+                color: AppColors.navbarText,
               ),
             ),
           ],
         ),
         content: Text(
           message,
-          style: const TextStyle(fontSize: 16, color: AppColors.black),
+          style: const TextStyle(fontSize: 16, color: AppColors.navbarText),
         ),
         actions: [
           TextButton(
@@ -109,7 +110,6 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
         ),
       );
 
-      // Volta para a tela anterior
       context.pop();
     } catch (e) {
       setState(() {
@@ -147,7 +147,7 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
     final displayName = authState.guestNickname ?? 'Visitante';
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.spacing24),
@@ -155,13 +155,13 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
             key: _formKey,
             child: Column(
               children: [
-                // Header com botão voltar
+
                 Row(
                   children: [
                     IconButton(
                       icon: const Icon(
                         Icons.arrow_back,
-                        color: AppColors.black,
+                        color: AppColors.navbarText,
                       ),
                       onPressed: () => context.pop(),
                     ),
@@ -171,7 +171,6 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
 
                 const SizedBox(height: AppSizes.spacing24),
 
-                // Ícone de visitante
                 Container(
                   width: 100,
                   height: 100,
@@ -188,18 +187,13 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
 
                 const SizedBox(height: AppSizes.spacing24),
 
-                // Título
                 Text(
                   'Editar Apelido',
-                  style: AppTextStyles.titleMedium.copyWith(
-                    fontSize: 28,
-                    color: AppColors.black,
-                  ),
+                  style: AppTextStyles.titleMedium.copyWith(fontSize: 28),
                 ),
 
                 const SizedBox(height: AppSizes.spacing8),
 
-                // Subtítulo
                 Text(
                   'Seu apelido atual: $displayName',
                   style: AppTextStyles.subtitle.copyWith(color: AppColors.grey),
@@ -208,27 +202,39 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
 
                 const SizedBox(height: AppSizes.spacing40),
 
-                // Campo de apelido
                 TextFormField(
                   controller: _nicknameController,
+                  style: const TextStyle(fontSize: 16, color: AppColors.white),
                   decoration: InputDecoration(
                     labelText: 'Novo Apelido',
+                    labelStyle: const TextStyle(color: AppColors.navbarText),
                     hintText: 'Digite seu novo apelido',
+                    hintStyle: TextStyle(
+                      color: AppColors.grey.withOpacity(0.5),
+                    ),
+                    filled: true,
+                    fillColor: Colors.transparent,
                     prefixIcon: const Icon(
                       Icons.badge_outlined,
-                      color: AppColors.grey,
+                      color: AppColors.primaryRed,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(
                         AppSizes.borderRadius,
                       ),
-                      borderSide: const BorderSide(color: AppColors.grey),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryRed,
+                        width: 1.5,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(
                         AppSizes.borderRadius,
                       ),
-                      borderSide: const BorderSide(color: AppColors.grey),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryRed,
+                        width: 1.5,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(
@@ -246,7 +252,7 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
                       borderSide: const BorderSide(color: AppColors.error),
                     ),
                     helperText: '3 a 20 caracteres',
-                    helperStyle: AppTextStyles.body.copyWith(
+                    helperStyle: const TextStyle(
                       fontSize: 12,
                       color: AppColors.grey,
                     ),
@@ -254,12 +260,10 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
                   textCapitalization: TextCapitalization.words,
                   enabled: !_isLoading,
                   validator: _validateNickname,
-                  style: AppTextStyles.body,
                 ),
 
                 const SizedBox(height: AppSizes.spacing32),
 
-                // Botão Salvar
                 SizedBox(
                   width: double.infinity,
                   height: AppSizes.buttonHeight,
@@ -284,7 +288,6 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
 
                 const SizedBox(height: AppSizes.spacing16),
 
-                // Divisor "ou"
                 Row(
                   children: [
                     const Expanded(
@@ -309,7 +312,6 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
 
                 const SizedBox(height: AppSizes.spacing16),
 
-                // Botão Criar Conta
                 SizedBox(
                   width: double.infinity,
                   height: AppSizes.buttonHeight,
@@ -327,28 +329,25 @@ class _GuestSettingsScreenState extends ConsumerState<GuestSettingsScreen> {
 
                 const SizedBox(height: AppSizes.spacing32),
 
-                // Info card
                 Container(
                   padding: const EdgeInsets.all(AppSizes.spacing16),
                   decoration: BoxDecoration(
-                    color: AppColors.greyLight,
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                    border: Border.all(color: AppColors.primaryRed, width: 1),
                   ),
                   child: Row(
                     children: [
                       const Icon(
                         Icons.info_outline,
-                        color: AppColors.grey,
+                        color: AppColors.primaryRed,
                         size: 20,
                       ),
                       const SizedBox(width: AppSizes.spacing12),
                       Expanded(
                         child: Text(
                           'Seus dados estão salvos de forma segura no dispositivo.',
-                          style: AppTextStyles.body.copyWith(
-                            fontSize: 13,
-                            color: AppColors.grey,
-                          ),
+                          style: AppTextStyles.body.copyWith(fontSize: 13),
                         ),
                       ),
                     ],

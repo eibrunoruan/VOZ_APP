@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../providers/cidades_sc_provider.dart';
 
-/// Nova Home Page inspirada no design do Reclame Aqui
 class HomePageNew extends ConsumerStatefulWidget {
   const HomePageNew({super.key});
 
@@ -12,234 +12,311 @@ class HomePageNew extends ConsumerStatefulWidget {
 }
 
 class _HomePageNewState extends ConsumerState<HomePageNew> {
-  final _searchController = TextEditingController();
   int _currentBannerIndex = 0;
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  void _searchCity(CidadeSC cidade) {
+
+    context.go(
+      '/map?lat=${cidade.coordenadas.latitude}&lng=${cidade.coordenadas.longitude}&city=${cidade.nome}',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryRed,
+      resizeToAvoidBottomInset: false, // Evita que o layout suba com o teclado
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // Header com logo e perfil
-            Padding(
-              padding: const EdgeInsets.all(AppSizes.spacing16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Logo
-                  Row(
+            Column(
+              children: [
+
+                Container(
+                  color: AppColors.primaryRed,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacing16,
+                    vertical: 50,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'VP',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryRed,
-                          ),
-                        ),
+
+                      Image.asset(
+                        'assets/images/vp-logo.png',
+                        height: 80,
+                        fit: BoxFit.contain,
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Voz do Povo',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+
+                      IconButton(
+                        icon: const Icon(
+                          Icons.account_circle,
                           color: AppColors.white,
+                          size: 40,
                         ),
+                        onPressed: () => context.go('/perfil'),
                       ),
                     ],
                   ),
-                  // Ícone de perfil
-                  CircleAvatar(
-                    backgroundColor: AppColors.white,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.person,
-                        color: AppColors.primaryRed,
+                ),
+
+                const SizedBox(
+                  height: 30,
+                ), // Espaço para a barra de busca sobreposta
+
+                Expanded(
+                  child: Container(
+                    clipBehavior: Clip.antiAlias,
+                    decoration: const BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
                       ),
-                      onPressed: () => context.go('/perfil'),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Barra de busca
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSizes.spacing16,
-                vertical: AppSizes.spacing8,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                    color: AppColors.grey.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  style: const TextStyle(color: AppColors.black),
-                  decoration: InputDecoration(
-                    hintText: 'Busque por cidades',
-                    hintStyle: TextStyle(
-                      color: AppColors.grey.withOpacity(0.7),
-                      fontSize: 16,
-                    ),
-                    prefixIcon: const Icon(Icons.search, color: AppColors.grey),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: AppSizes.spacing16),
-
-            // Conteúdo scrollável
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSizes.spacing20),
-                  child: Column(
-                    children: [
-                      // 4 Categorias
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSizes.spacing20,
+                        60,
+                        AppSizes.spacing20,
+                        AppSizes.spacing20,
+                      ),
+                      child: Column(
                         children: [
-                          _buildCategoryItem(
-                            icon: Icons.star,
-                            label: 'Populares',
-                            color: const Color(0xFFB4D96C),
-                            onTap: () {},
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildCategoryItem(
+                                icon: Icons.star,
+                                label: 'Populares',
+                                color: const Color(0xFFB4D96C),
+                                onTap: () {},
+                              ),
+                              _buildCategoryItem(
+                                icon: Icons.location_city,
+                                label: 'Cidades',
+                                color: const Color(0xFFB4D96C),
+                                onTap: () {},
+                              ),
+                              _buildCategoryItem(
+                                icon: Icons.article,
+                                label: 'Categorias',
+                                color: const Color(0xFFB4D96C),
+                                onTap: () {},
+                              ),
+                              _buildCategoryItem(
+                                icon: Icons.help_outline,
+                                label: 'Ajuda',
+                                color: const Color(0xFFB4D96C),
+                                onTap: () {},
+                              ),
+                            ],
                           ),
-                          _buildCategoryItem(
-                            icon: Icons.location_city,
-                            label: 'Cidades',
-                            color: const Color(0xFFB4D96C),
-                            onTap: () {},
+
+                          const SizedBox(height: AppSizes.spacing24),
+
+                          SizedBox(
+                            height: 180,
+                            child: PageView(
+                              onPageChanged: (index) {
+                                setState(() => _currentBannerIndex = index);
+                              },
+                              children: [
+                                _buildBanner(
+                                  title: 'Minhas\nDenúncias',
+                                  color: const Color(0xFFFDB94E),
+                                  imagePath: 'assets/images/megaphone.png',
+                                  onTap: () => context.go('/denuncias'),
+                                ),
+                                _buildBanner(
+                                  title: 'Faça sua\nDenúncia',
+                                  color: AppColors.primaryRed,
+                                  icon: Icons.campaign,
+                                  onTap: () => context.go('/create-denuncia'),
+                                ),
+                                _buildBanner(
+                                  title: 'Ver todas\nDenúncias',
+                                  color: const Color(0xFF4CAF50),
+                                  icon: Icons.visibility,
+                                  onTap: () => context.go('/map'),
+                                ),
+                              ],
+                            ),
                           ),
-                          _buildCategoryItem(
-                            icon: Icons.article,
-                            label: 'Categorias',
-                            color: const Color(0xFFB4D96C),
-                            onTap: () {},
+
+                          const SizedBox(height: AppSizes.spacing12),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              3,
+                              (index) => Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                width: _currentBannerIndex == index ? 24 : 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: _currentBannerIndex == index
+                                      ? AppColors.primaryRed
+                                      : AppColors.grey,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
                           ),
-                          _buildCategoryItem(
-                            icon: Icons.help_outline,
-                            label: 'Ajuda',
-                            color: const Color(0xFFB4D96C),
-                            onTap: () {},
-                          ),
+
+                          const SizedBox(height: AppSizes.spacing24),
                         ],
                       ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
 
-                      const SizedBox(height: AppSizes.spacing24),
-
-                      // Banner grande com PageView
-                      SizedBox(
-                        height: 180,
-                        child: PageView(
-                          onPageChanged: (index) {
-                            setState(() => _currentBannerIndex = index);
-                          },
-                          children: [
-                            _buildBanner(
-                              title: 'Minhas\nDenúncias',
-                              color: const Color(0xFFFDB94E),
-                              imagePath: 'assets/images/megaphone.png',
-                              onTap: () => context.go('/denuncias'),
-                            ),
-                            _buildBanner(
-                              title: 'Faça sua\nDenúncia',
-                              color: AppColors.primaryRed,
-                              icon: Icons.campaign,
-                              onTap: () => context.go('/create-denuncia'),
-                            ),
-                            _buildBanner(
-                              title: 'Ver todas\nDenúncias',
-                              color: const Color(0xFF4CAF50),
-                              icon: Icons.visibility,
-                              onTap: () => context.go('/map'),
+            Positioned(
+              top:
+                  165, // Posicionada para ficar metade no verde, metade no escuro
+              left: 16,
+              right: 16,
+              child: Autocomplete<CidadeSC>(
+                displayStringForOption: (CidadeSC cidade) => cidade.nome,
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text.isEmpty) {
+                    return const Iterable<CidadeSC>.empty();
+                  }
+                  final cidades = ref.read(cidadesSCProvider);
+                  return cidades.where((CidadeSC cidade) {
+                    return cidade.nome.toLowerCase().contains(
+                      textEditingValue.text.toLowerCase(),
+                    );
+                  });
+                },
+                onSelected: (CidadeSC cidade) {
+                  _searchCity(cidade);
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: AppColors.primaryRed,
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                      ),
-
-                      const SizedBox(height: AppSizes.spacing12),
-
-                      // Indicador de páginas
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          3,
-                          (index) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: _currentBannerIndex == index ? 24 : 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: _currentBannerIndex == index
-                                  ? AppColors.primaryRed
-                                  : AppColors.grey,
-                              borderRadius: BorderRadius.circular(4),
+                        child: TextField(
+                          controller: textEditingController,
+                          focusNode: focusNode,
+                          style: const TextStyle(color: AppColors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Busque por cidades de SC',
+                            hintStyle: TextStyle(
+                              color: AppColors.navbarText,
+                              fontSize: 16,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: AppColors.navbarText,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 15,
                             ),
                           ),
                         ),
-                      ),
-
-                      const SizedBox(height: AppSizes.spacing24),
-
-                      // Cards adicionais (2x2 grid)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildSmallCard(
-                              title: 'Cadastre sua\nempresa',
-                              icon: Icons.business,
-                              color: const Color(0xFFB4D96C),
-                              onTap: () {},
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<CidadeSC> onSelected,
+                      Iterable<CidadeSC> options,
+                    ) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width - 32,
+                              constraints: const BoxConstraints(maxHeight: 200),
+                              decoration: BoxDecoration(
+                                color: AppColors.background,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.primaryRed,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final CidadeSC cidade = options.elementAt(
+                                    index,
+                                  );
+                                  return InkWell(
+                                    onTap: () => onSelected(cidade),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: AppColors.primaryRed
+                                                .withOpacity(0.3),
+                                            width: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.location_city,
+                                            size: 20,
+                                            color: AppColors.primaryRed,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            cidade.nome,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              color: AppColors.navbarText,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
-                          const SizedBox(width: AppSizes.spacing12),
-                          Expanded(
-                            child: _buildSmallCard(
-                              title: 'Detector de\nsite confiável',
-                              icon: Icons.security,
-                              color: AppColors.grey,
-                              onTap: () {},
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                        ),
+                      );
+                    },
               ),
             ),
           ],
@@ -268,7 +345,7 @@ class _HomePageNewState extends ConsumerState<HomePageNew> {
           Text(
             label,
             style: const TextStyle(
-              color: AppColors.black,
+              color: AppColors.white,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -311,41 +388,6 @@ class _HomePageNewState extends ConsumerState<HomePageNew> {
             ),
             if (icon != null)
               Icon(icon, size: 80, color: AppColors.black.withOpacity(0.3)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSmallCard({
-    required String title,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 140,
-        padding: const EdgeInsets.all(AppSizes.spacing16),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 40, color: AppColors.black),
-            const Spacer(),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.black,
-                height: 1.2,
-              ),
-            ),
           ],
         ),
       ),

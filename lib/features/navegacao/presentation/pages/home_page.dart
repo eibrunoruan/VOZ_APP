@@ -66,7 +66,7 @@ class HomePage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Card de Boas-vindas
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSizes.spacing24),
@@ -115,7 +115,6 @@ class HomePage extends ConsumerWidget {
 
               const SizedBox(height: AppSizes.spacing32),
 
-              // Seção de Ações Rápidas
               const Text(
                 'Ações Rápidas',
                 style: TextStyle(
@@ -126,7 +125,6 @@ class HomePage extends ConsumerWidget {
               ),
               const SizedBox(height: AppSizes.spacing16),
 
-              // Grid de Cards de Ação
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
@@ -172,7 +170,6 @@ class HomePage extends ConsumerWidget {
 
               const SizedBox(height: AppSizes.spacing32),
 
-              // Estatísticas ou Informações Adicionais
               Container(
                 padding: const EdgeInsets.all(AppSizes.spacing24),
                 decoration: BoxDecoration(

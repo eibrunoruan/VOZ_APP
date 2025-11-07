@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Scaffold principal com bottom navigation bar
-/// Usado em todas as telas após login, exceto criar denúncia
+
 class MainScaffold extends StatelessWidget {
   final Widget child;
   final String currentPath;
@@ -56,16 +55,26 @@ class MainScaffold extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: child,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/create-denuncia'),
-        backgroundColor: AppColors.primaryRed,
-        elevation: 4,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: AppColors.white, size: 32),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.navbarText, width: 2),
+        ),
+        child: FloatingActionButton(
+          onPressed: () => context.go('/create-denuncia'),
+          backgroundColor: AppColors.primaryRed,
+          elevation: 4,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, color: AppColors.white, size: 32),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          color: AppColors.background,
+          border: Border(
+            top: BorderSide(color: AppColors.navbarText, width: 1),
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -75,7 +84,7 @@ class MainScaffold extends StatelessWidget {
           ],
         ),
         child: BottomAppBar(
-          color: AppColors.white,
+          color: Colors.transparent,
           elevation: 0,
           shape: const CircularNotchedRectangle(),
           notchMargin: 8,
@@ -108,8 +117,8 @@ class MainScaffold extends StatelessWidget {
                 ),
                 _buildNavItem(
                   context,
-                  icon: Icons.person_outline,
-                  activeIcon: Icons.person,
+                  icon: Icons.account_circle_outlined,
+                  activeIcon: Icons.account_circle,
                   label: 'Perfil',
                   index: 4,
                 ),
@@ -129,7 +138,7 @@ class MainScaffold extends StatelessWidget {
     required int index,
   }) {
     final isSelected = _selectedIndex == index;
-    final color = isSelected ? AppColors.primaryRed : AppColors.grey;
+    final color = isSelected ? AppColors.primaryRed : AppColors.navbarText;
 
     return Expanded(
       child: InkWell(

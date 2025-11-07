@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_theme.dart';
 
-/// Botão de editar perfil
 class EditProfileButton extends StatelessWidget {
   final VoidCallback onPressed;
 

@@ -5,7 +5,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/confirmation_bottom_sheet.dart';
 import '../../../autenticacao/presentation/notifiers/auth_notifier.dart';
 
-/// Página de perfil do usuário
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
@@ -48,10 +47,10 @@ class ProfilePage extends ConsumerWidget {
     );
 
     if (confirm == true && context.mounted) {
-      // Desloga o visitante
+
       await ref.read(authNotifierProvider.notifier).logout();
       if (context.mounted) {
-        // Vai para a tela de registro
+
         context.go('/register');
       }
     }
@@ -64,17 +63,20 @@ class ProfilePage extends ConsumerWidget {
     final displayName = authState.guestNickname ?? 'Usuário';
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.spacing24),
           child: Column(
             children: [
-              // Header com botão voltar
+
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: AppColors.black),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: AppColors.navbarText,
+                    ),
                     onPressed: () {
                       if (GoRouter.of(context).canPop()) {
                         context.pop();
@@ -89,49 +91,42 @@ class ProfilePage extends ConsumerWidget {
 
               const SizedBox(height: AppSizes.spacing24),
 
-              // Foto de perfil
               Container(
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: AppColors.greyLight,
+                  color: Colors.transparent,
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.primaryRed, width: 3),
                 ),
                 child: const Icon(
                   Icons.person,
                   size: 64,
-                  color: AppColors.grey,
+                  color: AppColors.primaryRed,
                 ),
               ),
 
               const SizedBox(height: AppSizes.spacing24),
 
-              // Nome do usuário
               Text(
                 displayName,
-                style: AppTextStyles.titleMedium.copyWith(
-                  fontSize: 28,
-                  color: AppColors.black,
-                ),
+                style: AppTextStyles.titleMedium.copyWith(fontSize: 28),
               ),
 
               const SizedBox(height: AppSizes.spacing8),
 
-              // Username
               Text(
                 isGuest
                     ? '@visitante'
                     : '@${displayName.toLowerCase().replaceAll(' ', '_')}',
-                style: AppTextStyles.subtitle.copyWith(color: AppColors.grey),
+                style: AppTextStyles.subtitle,
               ),
 
               const Spacer(),
 
-              // Botões de ação
               Column(
                 children: [
-                  // Botão Editar Perfil
+
                   SizedBox(
                     width: double.infinity,
                     height: AppSizes.buttonHeight,
@@ -140,7 +135,7 @@ class ProfilePage extends ConsumerWidget {
                         if (isGuest) {
                           context.push('/guest-settings');
                         } else {
-                          // TODO: Implementar edição de perfil para usuário logado
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Edição de perfil em breve!'),
@@ -158,14 +153,13 @@ class ProfilePage extends ConsumerWidget {
 
                   const SizedBox(height: AppSizes.spacing16),
 
-                  // Botão Configurações (apenas para usuários logados)
                   if (!isGuest)
                     SizedBox(
                       width: double.infinity,
                       height: AppSizes.buttonHeight,
                       child: OutlinedButton(
                         onPressed: () {
-                          // TODO: Implementar configurações
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Configurações em breve!'),
@@ -184,14 +178,17 @@ class ProfilePage extends ConsumerWidget {
 
                   if (!isGuest) const SizedBox(height: AppSizes.spacing16),
 
-                  // Botão Sair
                   SizedBox(
                     width: double.infinity,
                     height: AppSizes.buttonHeight,
                     child: OutlinedButton(
                       onPressed: () => _showLogoutModal(context, ref),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.error),
+                        backgroundColor: Colors.transparent,
+                        side: const BorderSide(
+                          color: AppColors.primaryRed,
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
                             AppSizes.borderRadius,
@@ -201,7 +198,7 @@ class ProfilePage extends ConsumerWidget {
                       child: Text(
                         'Sair da Conta',
                         style: AppTextStyles.button.copyWith(
-                          color: AppColors.error,
+                          color: AppColors.primaryRed,
                         ),
                       ),
                     ),
@@ -209,7 +206,6 @@ class ProfilePage extends ConsumerWidget {
 
                   const SizedBox(height: AppSizes.spacing32),
 
-                  // Informação adicional
                   if (isGuest)
                     InkWell(
                       onTap: () => _showCreateAccountModal(context, ref),
@@ -219,9 +215,13 @@ class ProfilePage extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(AppSizes.spacing16),
                         decoration: BoxDecoration(
-                          color: AppColors.greyLight,
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.circular(
                             AppSizes.borderRadius,
+                          ),
+                          border: Border.all(
+                            color: AppColors.primaryRed,
+                            width: 1.5,
                           ),
                         ),
                         child: Row(

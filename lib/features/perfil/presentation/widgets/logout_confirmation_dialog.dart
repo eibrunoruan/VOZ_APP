@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../autenticacao/presentation/notifiers/auth_notifier.dart';
 
-/// Dialog de confirmação de logout
 class LogoutConfirmationDialog extends ConsumerWidget {
   const LogoutConfirmationDialog({super.key});
 
@@ -36,7 +35,7 @@ class LogoutConfirmationDialog extends ConsumerWidget {
         style: AppTextStyles.body.copyWith(color: AppColors.grey),
       ),
       actions: [
-        // Botão Cancelar
+
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
@@ -48,7 +47,6 @@ class LogoutConfirmationDialog extends ConsumerWidget {
           ),
         ),
 
-        // Botão Sair
         TextButton(
           onPressed: () async {
             Navigator.of(context).pop(); // Fecha o dialog

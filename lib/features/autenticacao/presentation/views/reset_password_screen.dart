@@ -88,7 +88,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       _errorMessage = null;
     });
 
-    // Validar código
     if (!_isCodeComplete()) {
       setState(() {
         _errorMessage = 'Digite o código completo de 5 dígitos';
@@ -96,7 +95,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       return;
     }
 
-    // Validar formulário
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -115,7 +113,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
       if (!mounted) return;
 
-      // Mostrar sucesso e voltar para login
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -147,7 +144,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             : 'Código inválido ou expirado. Solicite um novo código.';
         _isLoading = false;
       });
-      // Limpar código
+
       for (var controller in _codeControllers) {
         controller.clear();
       }
@@ -211,7 +208,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
               children: [
                 const SizedBox(height: 20),
 
-                // Header
                 const Text(
                   'Digite o Código',
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -225,7 +221,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // Error message
                 if (_errorMessage != null)
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -249,7 +244,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                     ),
                   ),
 
-                // Code input fields
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(5, (index) {
@@ -278,8 +272,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                             _codeFocusNodes[index + 1].requestFocus();
                           }
                           if (_isCodeComplete()) {
-                            // Auto-submit quando completar (opcional)
-                            // _handleResetPassword();
+
+
                           }
                         },
                         onTap: () {
@@ -296,14 +290,12 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Resend code link
                 TextButton(
                   onPressed: _isLoading ? null : _handleResendCode,
                   child: const Text('Não recebeu o código? Reenviar'),
                 ),
                 const SizedBox(height: 32),
 
-                // Divider
                 const Row(
                   children: [
                     Expanded(child: Divider()),
@@ -316,7 +308,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Password field
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
@@ -346,7 +337,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Confirm Password field
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: InputDecoration(
@@ -375,7 +365,6 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // Reset button
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleResetPassword,
                   style: ElevatedButton.styleFrom(

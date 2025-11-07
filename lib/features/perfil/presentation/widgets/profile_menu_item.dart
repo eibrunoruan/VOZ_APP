@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_theme.dart';
 
-/// Item de menu do perfil (Configurações, Sair, etc)
 class ProfileMenuItem extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -18,8 +17,8 @@ class ProfileMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isDanger ? AppColors.error : AppColors.black;
-    final iconColor = isDanger ? AppColors.error : AppColors.primaryRed;
+    final textColor = AppColors.navbarText;
+    final iconColor = AppColors.primaryRed;
 
     return InkWell(
       onTap: onTap,
@@ -30,26 +29,26 @@ class ProfileMenuItem extends StatelessWidget {
           vertical: AppSizes.spacing16,
         ),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-          border: Border.all(color: AppColors.greyLight, width: 1),
+          border: Border.all(color: AppColors.primaryRed, width: 1.5),
         ),
         child: Row(
           children: [
-            // Ícone
+
             Container(
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: iconColor, width: 1),
               ),
               child: Icon(icon, color: iconColor, size: AppSizes.iconSize),
             ),
 
             const SizedBox(width: AppSizes.spacing16),
 
-            // Título
             Expanded(
               child: Text(
                 title,
@@ -61,8 +60,11 @@ class ProfileMenuItem extends StatelessWidget {
               ),
             ),
 
-            // Seta
-            Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.grey),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: AppColors.primaryRed,
+            ),
           ],
         ),
       ),

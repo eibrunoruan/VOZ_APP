@@ -1,4 +1,4 @@
-// Barrel file para widgets de autenticação
+
 export 'auth_header.dart';
 export 'auth_form_field.dart';
 export 'auth_password_field.dart';

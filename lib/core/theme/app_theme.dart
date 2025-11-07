@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 
-// Cores
 class AppColors {
-  static const Color primaryRed = Color(0xFFEE151F);
+  static const Color primaryRed = Color(0xFFa7cf36);
   static const Color white = Colors.white;
   static const Color black = Colors.black;
+  static const Color background = Color(0xFF1c1b20);
+  static const Color navbarText = Color(0xFFececee);
   static const Color grey = Color(0xFF9E9E9E);
   static const Color greyLight = Color(0xFFF5F5F5);
   static const Color error = Color(0xFFEF5350);
 }
 
-// Tamanhos
 class AppSizes {
-  // Border Radius
+
   static const double borderRadius = 12.0;
   static const double borderRadiusLarge = 40.0;
 
-  // Spacing
   static const double spacing8 = 8.0;
   static const double spacing12 = 12.0;
   static const double spacing16 = 16.0;
@@ -25,21 +24,17 @@ class AppSizes {
   static const double spacing32 = 32.0;
   static const double spacing40 = 40.0;
 
-  // Button Height
   static const double buttonHeight = 56.0;
 
-  // Input Height (controlled by padding)
   static const double inputPaddingVertical = 16.0;
   static const double inputPaddingHorizontal = 16.0;
 
-  // Icon Size
   static const double iconSize = 20.0;
   static const double iconSizeButton = 28.0;
 }
 
-// Text Styles
 class AppTextStyles {
-  // Títulos
+
   static const TextStyle titleLarge = TextStyle(
     fontSize: 48,
     fontWeight: FontWeight.bold,
@@ -50,39 +45,37 @@ class AppTextStyles {
   static const TextStyle titleMedium = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.w700,
-    color: AppColors.black,
+    color: AppColors.navbarText,
   );
 
   static const TextStyle subtitle = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
-    color: AppColors.black,
+    color: AppColors.navbarText,
   );
 
-  // Labels
   static const TextStyle label = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,
-    color: AppColors.black,
+    color: AppColors.navbarText,
   );
 
-  // Botões
   static const TextStyle button = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600,
   );
 
-  // Links
   static const TextStyle link = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w500,
   );
 
-  // Body
-  static const TextStyle body = TextStyle(fontSize: 16, color: AppColors.black);
+  static const TextStyle body = TextStyle(
+    fontSize: 16,
+    color: AppColors.navbarText,
+  );
 }
 
-// Input Decoration
 class AppInputDecoration {
   static InputDecoration standard({
     required String hintText,
@@ -90,15 +83,16 @@ class AppInputDecoration {
   }) {
     return InputDecoration(
       hintText: hintText,
+      hintStyle: TextStyle(color: AppColors.grey.withOpacity(0.5)),
       filled: true,
-      fillColor: AppColors.greyLight,
+      fillColor: Colors.transparent,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-        borderSide: const BorderSide(color: AppColors.black),
+        borderSide: const BorderSide(color: AppColors.primaryRed, width: 1.5),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-        borderSide: const BorderSide(color: AppColors.black),
+        borderSide: const BorderSide(color: AppColors.primaryRed, width: 1.5),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSizes.borderRadius),
@@ -121,7 +115,6 @@ class AppInputDecoration {
   }
 }
 
-// Button Styles
 class AppButtonStyles {
   static ButtonStyle primary = ElevatedButton.styleFrom(
     backgroundColor: AppColors.primaryRed,

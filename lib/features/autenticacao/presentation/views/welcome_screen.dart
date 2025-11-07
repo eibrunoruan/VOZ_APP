@@ -9,7 +9,7 @@ class WelcomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.spacing24),
@@ -17,10 +17,9 @@ class WelcomeScreen extends ConsumerWidget {
             children: [
               const Spacer(flex: 2),
 
-              // Logo e título
               Column(
                 children: [
-                  // Ícone do megafone
+
                   Container(
                     width: 120,
                     height: 120,
@@ -36,7 +35,6 @@ class WelcomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSizes.spacing32),
 
-                  // Título
                   Text(
                     'Voz do Povo',
                     style: AppTextStyles.titleMedium.copyWith(
@@ -46,7 +44,6 @@ class WelcomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSizes.spacing12),
 
-                  // Subtítulo
                   Text(
                     'Sua voz faz a diferença',
                     style: AppTextStyles.subtitle.copyWith(
@@ -59,10 +56,9 @@ class WelcomeScreen extends ConsumerWidget {
 
               const Spacer(flex: 3),
 
-              // Botões
               Column(
                 children: [
-                  // Botão Entrar
+
                   SizedBox(
                     width: double.infinity,
                     height: AppSizes.buttonHeight,
@@ -75,7 +71,6 @@ class WelcomeScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSizes.spacing16),
 
-                  // Botão Cadastrar
                   SizedBox(
                     width: double.infinity,
                     height: AppSizes.buttonHeight,
@@ -93,7 +88,6 @@ class WelcomeScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSizes.spacing32),
 
-                  // Divisor "ou"
                   Row(
                     children: [
                       const Expanded(
@@ -125,7 +119,6 @@ class WelcomeScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSizes.spacing24),
 
-                  // Botão "Continuar como visitante"
                   TextButton.icon(
                     onPressed: () => context.push('/guest-profile'),
                     style: AppButtonStyles.text,

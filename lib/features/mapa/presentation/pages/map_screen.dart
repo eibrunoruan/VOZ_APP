@@ -1,112 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geocoding/geocoding.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../denuncias/presentation/providers/denuncias_provider.dart';
 import '../../../denuncias/presentation/views/denuncia_detail_screen.dart';
 
-class MapPage extends ConsumerStatefulWidget {
-  final double? searchLat;
-  final double? searchLng;
-  final String? searchCity;
-
-  const MapPage({super.key, this.searchLat, this.searchLng, this.searchCity});
+class MapScreen extends ConsumerStatefulWidget {
+  const MapScreen({super.key});
 
   @override
-  ConsumerState<MapPage> createState() => _MapPageState();
+  ConsumerState<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapPageState extends ConsumerState<MapPage> {
+class _MapScreenState extends ConsumerState<MapScreen> {
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
-  bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _createMarkers();
-
-      if (widget.searchLat != null && widget.searchLng != null) {
-        _moveToCoordinates(
-          widget.searchLat!,
-          widget.searchLng!,
-          widget.searchCity,
-        );
-      }
-
-      else if (widget.searchCity != null && widget.searchCity!.isNotEmpty) {
-        _searchAndMoveToCity(widget.searchCity!);
-      }
     });
-  }
-
-  void _moveToCoordinates(double lat, double lng, String? cityName) {
-    if (_mapController != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14),
-      );
-
-      if (mounted && cityName != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Localizado: $cityName'),
-            backgroundColor: AppColors.primaryRed,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _searchAndMoveToCity(String cityName) async {
-    setState(() {
-      _isSearching = true;
-    });
-
-    try {
-
-      List<Location> locations = await locationFromAddress(
-        '$cityName, SC, Brasil',
-      );
-
-      if (locations.isNotEmpty && _mapController != null) {
-        final location = locations.first;
-        await _mapController!.animateCamera(
-          CameraUpdate.newLatLngZoom(
-            LatLng(location.latitude, location.longitude),
-            13,
-          ),
-        );
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Localizado: $cityName'),
-              backgroundColor: AppColors.primaryRed,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Cidade "$cityName" não encontrada'),
-            backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSearching = false;
-        });
-      }
-    }
   }
 
   void _createMarkers() {
@@ -193,11 +108,11 @@ class _MapPageState extends ConsumerState<MapPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.my_location, color: AppColors.navbarText),
             onPressed: () {
+
               if (_mapController != null) {
                 _mapController!.animateCamera(
                   CameraUpdate.newLatLngZoom(centerPosition, 12),
@@ -224,18 +139,6 @@ class _MapPageState extends ConsumerState<MapPage> {
               _mapController = controller;
             },
           ),
-
-          if (_isSearching)
-            Container(
-              color: Colors.black54,
-              child: const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.primaryRed,
-                  ),
-                ),
-              ),
-            ),
 
           Positioned(
             top: 16,

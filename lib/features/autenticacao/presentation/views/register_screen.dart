@@ -22,7 +22,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  // Controle de etapas
   int _currentStep = 0;
   final int _totalSteps = 4;
 
@@ -38,7 +37,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
-  // Navegação entre steps
   void _nextStep() {
     switch (_currentStep) {
       case 0: // Nome
@@ -82,7 +80,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           AuthErrorDialog.show(context, confirmError);
           return;
         }
-        // Última etapa - fazer o registro
+
         _handleRegister();
         return;
     }
@@ -99,7 +97,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    // Validate form
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -122,7 +120,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
       if (!mounted) return;
 
-      // Navigate to verify email screen with email and name
       context.go(
         '/verify-email',
         extra: {
@@ -158,7 +155,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Padding(
@@ -168,9 +165,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Botão Voltar
+
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: AppColors.black),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: AppColors.navbarText,
+                    ),
                     onPressed: _previousStep,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -178,7 +178,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                   const SizedBox(height: AppSizes.spacing24),
 
-                  // Barra de progresso das etapas
                   RegisterStepIndicator(
                     currentStep: _currentStep,
                     totalSteps: _totalSteps,
@@ -186,7 +185,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                   const SizedBox(height: AppSizes.spacing40),
 
-                  // Conteúdo da etapa atual
                   Expanded(
                     child: SingleChildScrollView(
                       child: RegisterStepContent(
@@ -204,10 +202,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                   const SizedBox(height: AppSizes.spacing24),
 
-                  // Botões de navegação
                   Column(
                     children: [
-                      // Botão Continuar/Cadastrar
+
                       AuthLoadingButton(
                         onPressed: _nextStep,
                         text: _currentStep == _totalSteps - 1
@@ -218,7 +215,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                       const SizedBox(height: AppSizes.spacing16),
 
-                      // Link para Login
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -226,7 +222,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             'Já tem conta? ',
                             style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.black,
+                              color: AppColors.navbarText,
                             ),
                           ),
                           TextButton(

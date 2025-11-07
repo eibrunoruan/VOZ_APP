@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Campo de senha com toggle de visibilidade
 class AuthPasswordField extends StatefulWidget {
   final TextEditingController controller;
   final String? label;
@@ -40,6 +39,7 @@ class _AuthPasswordFieldState extends State<AuthPasswordField> {
         ],
         TextFormField(
           controller: widget.controller,
+          style: const TextStyle(fontSize: 16, color: AppColors.white),
           decoration: AppInputDecoration.standard(
             hintText: widget.hintText,
             suffixIcon: IconButton(

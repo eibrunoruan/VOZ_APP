@@ -67,7 +67,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Padding(
@@ -77,7 +77,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header
+
                   const AuthHeader(
                     title: 'Esqueci minha senha',
                     subtitle:
@@ -86,7 +86,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
                   const SizedBox(height: AppSizes.spacing40),
 
-                  // Campo Email
                   AuthFormField(
                     controller: _emailController,
                     label: 'Email',
@@ -100,7 +99,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
                   const Spacer(),
 
-                  // Botões
                   Column(
                     children: [
                       AuthLoadingButton(

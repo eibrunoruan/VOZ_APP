@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Model simples para denúncia (apenas visual)
 class DenunciaModel {
   final String id;
   final String titulo;
@@ -27,7 +26,6 @@ class DenunciaModel {
   });
 }
 
-// Provider para gerenciar a lista de denúncias
 class DenunciasNotifier extends StateNotifier<List<DenunciaModel>> {
   DenunciasNotifier() : super(_denunciasExemplo);
 
@@ -40,7 +38,6 @@ class DenunciasNotifier extends StateNotifier<List<DenunciaModel>> {
   }
 }
 
-// Denúncias de exemplo para visualização
 final _denunciasExemplo = [
   DenunciaModel(
     id: '1',

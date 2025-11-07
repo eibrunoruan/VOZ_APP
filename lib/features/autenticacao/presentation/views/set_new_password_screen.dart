@@ -71,7 +71,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
       _errorMessage = null;
     });
 
-    // Validar formulário
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -90,31 +89,31 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
 
       if (!mounted) return;
 
-      // Mostrar sucesso e voltar para login
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
+          backgroundColor: AppColors.background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.borderRadius),
           ),
           title: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 28),
+              Icon(Icons.check_circle, color: AppColors.primaryRed, size: 28),
               const SizedBox(width: AppSizes.spacing12),
               const Text(
                 'Senha Redefinida!',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.black,
+                  color: AppColors.navbarText,
                 ),
               ),
             ],
           ),
           content: const Text(
             'Sua senha foi alterada com sucesso. Faça login com sua nova senha.',
-            style: TextStyle(fontSize: 16, color: AppColors.black),
+            style: TextStyle(fontSize: 16, color: AppColors.navbarText),
           ),
           actions: [
             ElevatedButton(
@@ -156,7 +155,7 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSizes.spacing24),
@@ -164,13 +163,13 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
             key: _formKey,
             child: Column(
               children: [
-                // Header com botão voltar
+
                 Row(
                   children: [
                     IconButton(
                       icon: const Icon(
                         Icons.arrow_back,
-                        color: AppColors.black,
+                        color: AppColors.navbarText,
                       ),
                       onPressed: () => context.pop(),
                     ),
@@ -180,7 +179,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
 
                 const SizedBox(height: AppSizes.spacing24),
 
-                // Ícone
                 Container(
                   width: 100,
                   height: 100,
@@ -197,7 +195,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
 
                 const SizedBox(height: AppSizes.spacing24),
 
-                // Título
                 Text(
                   'Nova Senha',
                   style: AppTextStyles.titleMedium.copyWith(
@@ -208,7 +205,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
 
                 const SizedBox(height: AppSizes.spacing8),
 
-                // Subtítulo
                 Text(
                   widget.email,
                   style: AppTextStyles.subtitle.copyWith(color: AppColors.grey),
@@ -217,7 +213,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
 
                 const SizedBox(height: AppSizes.spacing40),
 
-                // Error message
                 if (_errorMessage != null)
                   Container(
                     padding: const EdgeInsets.all(AppSizes.spacing16),
@@ -247,7 +242,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                     ),
                   ),
 
-                // Nova Senha
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
@@ -314,7 +308,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
 
                 const SizedBox(height: AppSizes.spacing16),
 
-                // Confirmar Senha
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: InputDecoration(
@@ -375,7 +368,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
 
                 const SizedBox(height: AppSizes.spacing32),
 
-                // Botão Redefinir
                 SizedBox(
                   width: double.infinity,
                   height: AppSizes.buttonHeight,
@@ -397,7 +389,6 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
 
                 const SizedBox(height: AppSizes.spacing24),
 
-                // Info box
                 Container(
                   padding: const EdgeInsets.all(AppSizes.spacing16),
                   decoration: BoxDecoration(

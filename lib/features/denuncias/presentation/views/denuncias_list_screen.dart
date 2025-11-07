@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/denuncias_provider.dart';
 import '../widgets/denuncia_card.dart';
+import 'denuncia_detail_screen.dart';
 
 class DenunciasListScreen extends ConsumerStatefulWidget {
   const DenunciasListScreen({super.key});
@@ -38,7 +39,7 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.background,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -47,44 +48,46 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
+
             Container(
               margin: const EdgeInsets.only(top: 12),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.greyLight,
+                color: AppColors.grey.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            // Título
+
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
-                  Icon(Icons.filter_list, color: AppColors.black),
+                  Icon(Icons.filter_list, color: AppColors.primaryRed),
                   SizedBox(width: 12),
                   Text(
                     'Filtrar por Status',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.black,
+                      color: AppColors.navbarText,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-            // Lista de filtros
+
             ...List.generate(_filters.length, (index) {
               final filter = _filters[index];
               final isSelected = _selectedFilter == filter;
               return ListTile(
                 leading: Icon(
                   isSelected ? Icons.check_circle : Icons.circle_outlined,
-                  color: isSelected ? AppColors.primaryRed : AppColors.grey,
+                  color: isSelected
+                      ? AppColors.primaryRed
+                      : AppColors.navbarText,
                 ),
                 title: Text(
                   filter,
@@ -92,7 +95,9 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
                     fontWeight: isSelected
                         ? FontWeight.bold
                         : FontWeight.normal,
-                    color: isSelected ? AppColors.primaryRed : AppColors.black,
+                    color: isSelected
+                        ? AppColors.primaryRed
+                        : AppColors.navbarText,
                   ),
                 ),
                 onTap: () {
@@ -112,12 +117,10 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
   Widget build(BuildContext context) {
     final denuncias = ref.watch(denunciasProvider);
 
-    // Filtrar por status
     var filteredDenuncias = _selectedFilter == 'Todas'
         ? denuncias
         : denuncias.where((d) => d.status == _selectedFilter).toList();
 
-    // Filtrar por pesquisa
     if (_searchQuery.isNotEmpty) {
       filteredDenuncias = filteredDenuncias.where((d) {
         return d.titulo.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -128,20 +131,20 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
           'Minhas Denúncias',
           style: TextStyle(
-            color: AppColors.black,
+            color: AppColors.navbarText,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
+          icon: const Icon(Icons.arrow_back, color: AppColors.navbarText),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -153,13 +156,13 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
       ),
       body: Column(
         children: [
-          // Barra de Pesquisa + Filtro
+
           Container(
-            color: AppColors.white,
+            color: AppColors.background,
             padding: const EdgeInsets.all(AppSizes.spacing16),
             child: Row(
               children: [
-                // Barra de Pesquisa
+
                 Expanded(
                   child: SizedBox(
                     height: AppSizes.buttonHeight,
@@ -167,24 +170,26 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
                       controller: _searchController,
                       onChanged: (value) =>
                           setState(() => _searchQuery = value),
-                      style: AppTextStyles.body,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.white,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Pesquisar denúncias...',
                         hintStyle: AppTextStyles.body.copyWith(
                           color: AppColors.grey,
                         ),
                         filled: true,
-                        fillColor: AppColors.greyLight,
+                        fillColor: Colors.transparent,
                         prefixIcon: const Icon(
                           Icons.search,
-                          color: AppColors.black,
+                          color: AppColors.primaryRed,
                           size: AppSizes.iconSize,
                         ),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(
                                   Icons.clear,
-                                  color: AppColors.black,
+                                  color: AppColors.navbarText,
                                   size: AppSizes.iconSize,
                                 ),
                                 onPressed: () {
@@ -197,13 +202,19 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
                           borderRadius: BorderRadius.circular(
                             AppSizes.borderRadius,
                           ),
-                          borderSide: const BorderSide(color: AppColors.black),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryRed,
+                            width: 1.5,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(
                             AppSizes.borderRadius,
                           ),
-                          borderSide: const BorderSide(color: AppColors.black),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryRed,
+                            width: 1.5,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(
@@ -223,21 +234,16 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
                   ),
                 ),
                 const SizedBox(width: AppSizes.spacing12),
-                // Botão de Filtro
+
                 Container(
                   height: AppSizes.buttonHeight,
                   width: AppSizes.buttonHeight,
                   decoration: BoxDecoration(
                     color: _selectedFilter != 'Todas'
                         ? AppColors.primaryRed
-                        : AppColors.greyLight,
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-                    border: Border.all(
-                      color: _selectedFilter != 'Todas'
-                          ? AppColors.primaryRed
-                          : AppColors.black,
-                      width: 1,
-                    ),
+                    border: Border.all(color: AppColors.primaryRed, width: 1.5),
                   ),
                   child: Stack(
                     children: [
@@ -246,7 +252,7 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
                           Icons.filter_list,
                           color: _selectedFilter != 'Todas'
                               ? AppColors.white
-                              : AppColors.black,
+                              : AppColors.primaryRed,
                           size: AppSizes.iconSizeButton,
                         ),
                         onPressed: _showFilterBottomSheet,
@@ -271,10 +277,6 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
             ),
           ),
 
-          // Divider
-          const Divider(height: 1, color: AppColors.greyLight),
-
-          // Lista de denúncias
           Expanded(
             child: filteredDenuncias.isEmpty
                 ? _buildEmptyState()
@@ -288,11 +290,11 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
                       return DenunciaCard(
                         denuncia: denuncia,
                         onTap: () {
-                          // TODO: Navegar para detalhes da denúncia
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Detalhes: ${denuncia.titulo}'),
-                              backgroundColor: AppColors.primaryRed,
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  DenunciaDetailScreen(denuncia: denuncia),
                             ),
                           );
                         },
@@ -306,7 +308,7 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
   }
 
   Widget _buildEmptyState() {
-    // Mensagem diferente se houver busca ativa
+
     final hasSearch = _searchQuery.isNotEmpty;
     final hasFilter = _selectedFilter != 'Todas';
 
@@ -328,14 +330,14 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 80, color: AppColors.grey),
+          Icon(icon, size: 80, color: AppColors.navbarText),
           const SizedBox(height: 16),
           Text(
             message,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 16,
-              color: AppColors.grey,
+              color: AppColors.navbarText,
               height: 1.5,
             ),
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// Campo de formulário padronizado para autenticação
 class AuthFormField extends StatelessWidget {
   final TextEditingController controller;
   final String? label;
@@ -41,6 +40,7 @@ class AuthFormField extends StatelessWidget {
         ],
         TextFormField(
           controller: controller,
+          style: const TextStyle(fontSize: 16, color: AppColors.white),
           decoration: AppInputDecoration.standard(
             hintText: hintText,
           ).copyWith(suffixIcon: suffixIcon),

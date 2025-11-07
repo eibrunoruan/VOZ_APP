@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_theme.dart';
 
-/// Widget que exibe o cabeçalho do perfil com foto, nome e username
 class ProfileHeader extends StatelessWidget {
   final String displayName;
   final String username;
@@ -18,13 +17,13 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Foto de perfil
+
         Container(
           width: 100,
           height: 100,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.primaryRed.withOpacity(0.1),
+            color: Colors.transparent,
             border: Border.all(color: AppColors.primaryRed, width: 3),
           ),
           child: Icon(
@@ -36,25 +35,17 @@ class ProfileHeader extends StatelessWidget {
 
         const SizedBox(height: AppSizes.spacing16),
 
-        // Nome do usuário
         Text(
           displayName,
-          style: AppTextStyles.titleMedium.copyWith(
-            fontSize: 24,
-            color: AppColors.black,
-          ),
+          style: AppTextStyles.titleMedium.copyWith(fontSize: 24),
           textAlign: TextAlign.center,
         ),
 
         const SizedBox(height: AppSizes.spacing8),
 
-        // Username
         Text(
           '@$username',
-          style: AppTextStyles.subtitle.copyWith(
-            fontSize: 16,
-            color: AppColors.grey,
-          ),
+          style: AppTextStyles.subtitle.copyWith(fontSize: 16),
           textAlign: TextAlign.center,
         ),
       ],

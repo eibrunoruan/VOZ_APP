@@ -80,7 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
@@ -90,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header
+
                     AuthHeader(
                       title: 'Login',
                       subtitle: 'Entre com suas credenciais',
@@ -99,7 +99,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     const SizedBox(height: AppSizes.spacing40),
 
-                    // Campo Nome de Usuário
                     AuthFormField(
                       controller: _usernameController,
                       label: 'Nome de Usuário',
@@ -111,7 +110,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     const SizedBox(height: AppSizes.spacing20),
 
-                    // Campo Senha
                     AuthPasswordField(
                       controller: _passwordController,
                       label: 'Senha',
@@ -122,7 +120,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onFieldSubmitted: (_) => _handleLogin(),
                     ),
 
-                    // Esqueceu a senha
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -136,7 +133,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     const SizedBox(height: AppSizes.spacing8),
 
-                    // Botão Entrar
                     AuthLoadingButton(
                       onPressed: _handleLogin,
                       text: 'Entrar',
@@ -145,7 +141,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     const SizedBox(height: AppSizes.spacing24),
 
-                    // Link para cadastro
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

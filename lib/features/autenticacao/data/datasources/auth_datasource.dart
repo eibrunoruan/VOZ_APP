@@ -7,7 +7,6 @@ import '../models/login_response_model.dart';
 import '../models/register_request_model.dart';
 import '../models/user_model.dart';
 
-// Contrato da fonte de dados de autenticação
 abstract class AuthDatasource {
   Future<LoginResponse> login(String username, String password);
   Future<User> register(RegisterRequest request);
@@ -23,7 +22,6 @@ abstract class AuthDatasource {
   Future<void> logout();
 }
 
-// Implementação da fonte de dados
 class AuthDatasourceImpl implements AuthDatasource {
   final Dio _dio;
   final FlutterSecureStorage _storage;
@@ -40,7 +38,7 @@ class AuthDatasourceImpl implements AuthDatasource {
 
       if (response.statusCode == 200) {
         final loginResponse = LoginResponse.fromJson(response.data);
-        // Armazena os tokens de forma segura
+
         await _storage.write(key: 'access_token', value: loginResponse.access);
         await _storage.write(
           key: 'refresh_token',
@@ -92,7 +90,6 @@ class AuthDatasourceImpl implements AuthDatasource {
       if (e.response?.statusCode == 400) {
         final data = e.response?.data;
 
-        // Verifica erros específicos de campo
         if (data is Map) {
           if (data['email'] != null) {
             throw EmailAlreadyExistsException(data['email'][0]);
@@ -262,12 +259,11 @@ class AuthDatasourceImpl implements AuthDatasource {
 
   @override
   Future<void> logout() async {
-    // Limpa os tokens do armazenamento seguro
+
     await _storage.deleteAll();
   }
 }
 
-// Provider para a implementação do datasource
 final authDatasourceProvider = Provider<AuthDatasource>((ref) {
   return AuthDatasourceImpl(
     ref.watch(dioProvider),

@@ -30,7 +30,6 @@ class _ValidateResetCodeScreenState
 
   bool _isLoading = false;
 
-  // Timer para expiração do código
   int _expirationTimer = 300; // 5 minutos = 300 segundos
   Timer? _timer;
 
@@ -64,26 +63,27 @@ class _ValidateResetCodeScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.borderRadius),
         ),
         title: Row(
           children: [
-            Icon(Icons.error_outline, color: AppColors.primaryRed, size: 28),
+            Icon(Icons.error_outline, color: AppColors.error, size: 28),
             const SizedBox(width: AppSizes.spacing12),
             const Text(
               'Erro',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.black,
+                color: AppColors.navbarText,
               ),
             ),
           ],
         ),
         content: Text(
           message,
-          style: const TextStyle(fontSize: 16, color: AppColors.black),
+          style: const TextStyle(fontSize: 16, color: AppColors.navbarText),
         ),
         actions: [
           TextButton(
@@ -127,7 +127,7 @@ class _ValidateResetCodeScreenState
   }
 
   Future<void> _handleValidateCode() async {
-    // Validar código
+
     if (!_isCodeComplete()) {
       _showErrorDialog('Digite o código completo de 5 dígitos');
       return;
@@ -143,7 +143,6 @@ class _ValidateResetCodeScreenState
 
       if (!mounted) return;
 
-      // Código válido! Navega para tela de nova senha
       context.push(
         '/set-new-password',
         extra: {'email': widget.email, 'code': _getCode()},
@@ -210,7 +209,7 @@ class _ValidateResetCodeScreenState
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: Padding(
@@ -218,9 +217,12 @@ class _ValidateResetCodeScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Botão Voltar
+
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: AppColors.black),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: AppColors.navbarText,
+                  ),
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -228,12 +230,10 @@ class _ValidateResetCodeScreenState
 
                 const SizedBox(height: AppSizes.spacing32),
 
-                // Título
                 const Text('Validar Código', style: AppTextStyles.titleMedium),
 
                 const SizedBox(height: AppSizes.spacing8),
 
-                // Subtítulo
                 const Text(
                   'Digite o código de 5 dígitos enviado para seu email',
                   style: AppTextStyles.subtitle,
@@ -241,7 +241,6 @@ class _ValidateResetCodeScreenState
 
                 const SizedBox(height: AppSizes.spacing40),
 
-                // Campos de código
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(5, (index) {
@@ -258,19 +257,19 @@ class _ValidateResetCodeScreenState
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.black,
+                          color: AppColors.white,
                         ),
                         decoration: InputDecoration(
                           counterText: '',
                           filled: true,
-                          fillColor: AppColors.greyLight,
+                          fillColor: Colors.transparent,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(
                               AppSizes.borderRadius,
                             ),
                             borderSide: const BorderSide(
-                              color: AppColors.black,
-                              width: 1,
+                              color: AppColors.primaryRed,
+                              width: 1.5,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -278,8 +277,8 @@ class _ValidateResetCodeScreenState
                               AppSizes.borderRadius,
                             ),
                             borderSide: const BorderSide(
-                              color: AppColors.black,
-                              width: 1,
+                              color: AppColors.primaryRed,
+                              width: 1.5,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -305,7 +304,6 @@ class _ValidateResetCodeScreenState
                             _codeFocusNodes[index - 1].requestFocus();
                           }
 
-                          // Auto-submit quando completar código
                           if (_isCodeComplete()) {
                             _handleValidateCode();
                           }
@@ -325,7 +323,6 @@ class _ValidateResetCodeScreenState
 
                 const SizedBox(height: AppSizes.spacing16),
 
-                // Cronômetro de expiração
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -354,10 +351,9 @@ class _ValidateResetCodeScreenState
 
                 const Spacer(),
 
-                // Botões fixados na parte inferior
                 Column(
                   children: [
-                    // Botão Validar
+
                     SizedBox(
                       width: double.infinity,
                       height: AppSizes.buttonHeight,
@@ -387,7 +383,6 @@ class _ValidateResetCodeScreenState
 
                     const SizedBox(height: AppSizes.spacing16),
 
-                    // Reenviar código
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -395,7 +390,7 @@ class _ValidateResetCodeScreenState
                           'Não recebeu o código? ',
                           style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.black,
+                            color: AppColors.navbarText,
                           ),
                         ),
                         TextButton(
