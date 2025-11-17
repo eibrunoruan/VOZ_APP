@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../denuncias/presentation/providers/denuncias_provider.dart';
+import '../../../denuncias/presentation/notifiers/denuncias_notifier.dart';
 import '../../../denuncias/presentation/views/denuncia_detail_screen.dart';
 
 class MapPage extends ConsumerStatefulWidget {
@@ -26,6 +26,7 @@ class _MapPageState extends ConsumerState<MapPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(denunciasNotifierProvider.notifier).loadDenuncias();
       _createMarkers();
 
       if (widget.searchLat != null && widget.searchLng != null) {
@@ -110,26 +111,26 @@ class _MapPageState extends ConsumerState<MapPage> {
   }
 
   void _createMarkers() {
-    final denuncias = ref.read(denunciasProvider);
+    final denunciasState = ref.read(denunciasNotifierProvider);
     final markers = <Marker>{};
 
-    for (final denuncia in denuncias) {
+    for (final denuncia in denunciasState.denuncias) {
       markers.add(
         Marker(
-          markerId: MarkerId(denuncia.id),
+          markerId: MarkerId(denuncia.id.toString()),
           position: LatLng(denuncia.latitude, denuncia.longitude),
           icon: BitmapDescriptor.defaultMarkerWithHue(
             _getMarkerColor(denuncia.status),
           ),
           infoWindow: InfoWindow(
             title: denuncia.titulo,
-            snippet: denuncia.categoria,
+            snippet: denuncia.categoriaNome ?? 'Denúncia',
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      DenunciaDetailScreen(denuncia: denuncia),
+                      DenunciaDetailScreen(denunciaId: denuncia.id),
                 ),
               );
             },
@@ -145,13 +146,13 @@ class _MapPageState extends ConsumerState<MapPage> {
 
   double _getMarkerColor(String status) {
     switch (status) {
-      case 'Aguardando Análise':
+      case 'AGUARDANDO_ANALISE':
         return BitmapDescriptor.hueOrange;
-      case 'Em Análise':
+      case 'EM_ANALISE':
         return BitmapDescriptor.hueBlue;
-      case 'Resolvida':
+      case 'RESOLVIDA':
         return BitmapDescriptor.hueGreen;
-      case 'Rejeitada':
+      case 'REJEITADA':
         return BitmapDescriptor.hueRed;
       default:
         return BitmapDescriptor.hueRed;
@@ -160,7 +161,8 @@ class _MapPageState extends ConsumerState<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    final denuncias = ref.watch(denunciasProvider);
+    final denunciasState = ref.watch(denunciasNotifierProvider);
+    final denuncias = denunciasState.denuncias;
 
     LatLng centerPosition = const LatLng(
       -23.550520,

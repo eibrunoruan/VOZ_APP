@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../denuncias/presentation/providers/denuncias_provider.dart';
+import '../../../denuncias/presentation/notifiers/denuncias_notifier.dart';
 import '../../../denuncias/presentation/views/denuncia_detail_screen.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
@@ -19,32 +19,39 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   void initState() {
     super.initState();
+    // Carrega denúncias ao abrir o mapa
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _createMarkers();
+      ref.read(denunciasNotifierProvider.notifier).loadDenuncias();
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _createMarkers();
+  }
+
   void _createMarkers() {
-    final denuncias = ref.read(denunciasProvider);
+    final denunciasState = ref.read(denunciasNotifierProvider);
     final markers = <Marker>{};
 
-    for (final denuncia in denuncias) {
+    for (final denuncia in denunciasState.denuncias) {
       markers.add(
         Marker(
-          markerId: MarkerId(denuncia.id),
+          markerId: MarkerId(denuncia.id.toString()),
           position: LatLng(denuncia.latitude, denuncia.longitude),
           icon: BitmapDescriptor.defaultMarkerWithHue(
             _getMarkerColor(denuncia.status),
           ),
           infoWindow: InfoWindow(
             title: denuncia.titulo,
-            snippet: denuncia.categoria,
+            snippet: denuncia.categoriaNome ?? 'Denúncia',
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      DenunciaDetailScreen(denuncia: denuncia),
+                      DenunciaDetailScreen(denunciaId: denuncia.id),
                 ),
               );
             },
@@ -53,20 +60,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       );
     }
 
-    setState(() {
-      _markers = markers;
-    });
+    if (mounted) {
+      setState(() {
+        _markers = markers;
+      });
+    }
   }
 
   double _getMarkerColor(String status) {
     switch (status) {
-      case 'Aguardando Análise':
+      case 'AGUARDANDO_ANALISE':
         return BitmapDescriptor.hueOrange;
-      case 'Em Análise':
+      case 'EM_ANALISE':
         return BitmapDescriptor.hueBlue;
-      case 'Resolvida':
+      case 'RESOLVIDA':
         return BitmapDescriptor.hueGreen;
-      case 'Rejeitada':
+      case 'REJEITADA':
         return BitmapDescriptor.hueRed;
       default:
         return BitmapDescriptor.hueRed;
@@ -75,7 +84,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final denuncias = ref.watch(denunciasProvider);
+    final denunciasState = ref.watch(denunciasNotifierProvider);
+    
+    // Atualiza marcadores quando denúncias mudarem
+    if (denunciasState.denuncias.isNotEmpty) {
+      _createMarkers();
+    }
+
+    final denuncias = denunciasState.denuncias;
 
     LatLng centerPosition = const LatLng(
       -23.550520,

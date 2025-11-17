@@ -19,7 +19,7 @@ class ConfirmationBottomSheet {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
         child: Container(
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.7,
@@ -122,32 +122,35 @@ class ConfirmationBottomSheet {
                         ),
                       ),
 
-                      const SizedBox(height: AppSizes.spacing12),
-
-                      SizedBox(
-                        width: double.infinity,
-                        height: AppSizes.buttonHeight,
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: AppColors.primaryRed,
-                              width: 1.5,
+                      // Só mostra o botão de cancelar se o texto não estiver vazio
+                      if (cancelText.isNotEmpty) ...[
+                        const SizedBox(height: AppSizes.spacing12),
+                        
+                        SizedBox(
+                          width: double.infinity,
+                          height: AppSizes.buttonHeight,
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(
+                                color: AppColors.primaryRed,
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.borderRadius,
+                                ),
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppSizes.borderRadius,
+                            child: Text(
+                              cancelText,
+                              style: AppTextStyles.button.copyWith(
+                                color: AppColors.primaryRed,
                               ),
                             ),
                           ),
-                          child: Text(
-                            cancelText,
-                            style: AppTextStyles.button.copyWith(
-                              color: AppColors.primaryRed,
-                            ),
-                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
