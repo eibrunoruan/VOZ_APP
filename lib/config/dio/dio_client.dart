@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../features/autenticacao/presentation/notifiers/auth_notifier.dart';
 import '../env/env.dart';
 
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -11,9 +12,9 @@ final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: Env.apiUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-      sendTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 30),
     ),
   );
 
@@ -39,9 +40,16 @@ final dioProvider = Provider<Dio>((ref) {
         if (!isPublicEndpoint) {
           final storage = ref.read(secureStorageProvider);
           final token = await storage.read(key: 'access_token');
-          if (token != null) {
+          
+          // Verifica se é usuário guest - não deve enviar token
+          final authState = ref.read(authNotifierProvider);
+          final isGuest = authState.isGuest;
+          
+          if (token != null && !isGuest) {
             options.headers['Authorization'] = 'Bearer $token';
             print('🔑 Token adicionado à requisição');
+          } else if (isGuest) {
+            print('👤 Usuário guest - sem token');
           }
         } else {
           print('🌍 Endpoint público - sem token');
@@ -58,6 +66,38 @@ final dioProvider = Provider<Dio>((ref) {
         print('🔗 URL: ${e.requestOptions.baseUrl}${e.requestOptions.path}');
         print('📊 Status Code: ${e.response?.statusCode}');
         print('📄 Response Data: ${e.response?.data}');
+
+        // Retry logic para timeouts e erros de rede
+        if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.sendTimeout ||
+            e.response?.statusCode == 503) {
+          
+          final retries = e.requestOptions.extra['retries'] ?? 0;
+          const maxRetries = 3;
+          
+          if (retries < maxRetries) {
+            // Exponential backoff: 2s, 4s, 8s
+            final delaySeconds = 2 << retries;
+            print('🔄 Tentando novamente em ${delaySeconds}s (tentativa ${retries + 1}/$maxRetries)');
+            
+            await Future.delayed(Duration(seconds: delaySeconds));
+            
+            // Incrementa contador de retries
+            e.requestOptions.extra['retries'] = retries + 1;
+            
+            try {
+              final response = await dio.fetch(e.requestOptions);
+              return handler.resolve(response);
+            } catch (retryError) {
+              // Se falhar após todos os retries, propaga o erro
+              if (retries + 1 >= maxRetries) {
+                print('❌ Falhou após $maxRetries tentativas');
+                return handler.next(e);
+              }
+            }
+          }
+        }
 
         // Token expirado pode retornar 401 ou 403 dependendo da configuração do backend
         final isTokenExpired = (e.response?.statusCode == 401 || 

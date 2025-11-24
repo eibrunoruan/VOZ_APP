@@ -37,19 +37,24 @@ class CategoriasNotifier extends StateNotifier<CategoriasState> {
   Future<void> loadCategorias() async {
     if (state.categorias.isNotEmpty && !state.isLoading) {
       // Já carregou, não precisa recarregar
+      print('✅ Categorias já carregadas: ${state.categorias.length}');
       return;
     }
 
+    print('📋 Iniciando carregamento de categorias...');
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final categorias = await _repository.getCategorias();
+      print('✅ Categorias carregadas com sucesso: ${categorias.length}');
       state = state.copyWith(
         categorias: categorias,
         isLoading: false,
         error: null,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ Erro ao carregar categorias: $e');
+      print('   StackTrace: $stackTrace');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),

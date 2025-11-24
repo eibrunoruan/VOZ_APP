@@ -1,10 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../denuncias/data/models/categoria_model.dart';
+import '../../../denuncias/data/models/denuncia_model.dart';
+import '../../../denuncias/data/repositories/denuncias_repository.dart';
 import '../../../denuncias/presentation/notifiers/denuncias_notifier.dart';
-import '../../../denuncias/presentation/views/denuncia_detail_screen.dart';
+import '../widgets/map_denuncias_list.dart';
+import '../widgets/map_filter_modal.dart';
+import '../widgets/map_section.dart';
 
 class MapPage extends ConsumerStatefulWidget {
   final double? searchLat;
@@ -18,319 +23,255 @@ class MapPage extends ConsumerStatefulWidget {
 }
 
 class _MapPageState extends ConsumerState<MapPage> {
-  GoogleMapController? _mapController;
-  Set<Marker> _markers = {};
-  bool _isSearching = false;
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+  Timer? _debounceTimer;
+  MapFilterResult? _currentFilters;
+  List<CategoriaModel> _categorias = [];
 
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(denunciasNotifierProvider.notifier).loadDenuncias();
-      _createMarkers();
+      _loadCategorias();
+      ref.read(denunciasNotifierProvider.notifier).loadAllDenuncias();
+    });
+  }
 
-      if (widget.searchLat != null && widget.searchLng != null) {
-        _moveToCoordinates(
-          widget.searchLat!,
-          widget.searchLng!,
-          widget.searchCity,
-        );
-      }
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
 
-      else if (widget.searchCity != null && widget.searchCity!.isNotEmpty) {
-        _searchAndMoveToCity(widget.searchCity!);
+  void _onSearchChanged() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() => _searchQuery = _searchController.text);
       }
     });
   }
 
-  void _moveToCoordinates(double lat, double lng, String? cityName) {
-    if (_mapController != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(LatLng(lat, lng), 14),
-      );
-
-      if (mounted && cityName != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Localizado: $cityName'),
-            backgroundColor: AppColors.primaryRed,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _searchAndMoveToCity(String cityName) async {
-    setState(() {
-      _isSearching = true;
-    });
-
+  Future<void> _loadCategorias() async {
     try {
-
-      List<Location> locations = await locationFromAddress(
-        '$cityName, SC, Brasil',
-      );
-
-      if (locations.isNotEmpty && _mapController != null) {
-        final location = locations.first;
-        await _mapController!.animateCamera(
-          CameraUpdate.newLatLngZoom(
-            LatLng(location.latitude, location.longitude),
-            13,
-          ),
-        );
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Localizado: $cityName'),
-              backgroundColor: AppColors.primaryRed,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
+      final categorias = await ref.read(denunciasRepositoryProvider).getCategorias();
+      if (mounted) {
+        setState(() => _categorias = categorias);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Cidade "$cityName" não encontrada'),
-            backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSearching = false;
-        });
-      }
+      // Erro ao carregar categorias
     }
   }
 
-  void _createMarkers() {
-    final denunciasState = ref.read(denunciasNotifierProvider);
-    final markers = <Marker>{};
+  Future<void> _showFilters() async {
+    final result = await MapFilterModal.show(
+      context: context,
+      categorias: _categorias,
+      currentFilters: _currentFilters,
+    );
 
-    for (final denuncia in denunciasState.denuncias) {
-      markers.add(
-        Marker(
-          markerId: MarkerId(denuncia.id.toString()),
-          position: LatLng(denuncia.latitude, denuncia.longitude),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            _getMarkerColor(denuncia.status),
-          ),
-          infoWindow: InfoWindow(
-            title: denuncia.titulo,
-            snippet: denuncia.categoriaNome ?? 'Denúncia',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      DenunciaDetailScreen(denunciaId: denuncia.id),
-                ),
-              );
-            },
-          ),
-        ),
-      );
+    if (result != null && mounted) {
+      setState(() => _currentFilters = result);
+      _applyFilters();
     }
-
-    setState(() {
-      _markers = markers;
-    });
   }
 
-  double _getMarkerColor(String status) {
-    switch (status) {
-      case 'AGUARDANDO_ANALISE':
-        return BitmapDescriptor.hueOrange;
-      case 'EM_ANALISE':
-        return BitmapDescriptor.hueBlue;
-      case 'RESOLVIDA':
-        return BitmapDescriptor.hueGreen;
-      case 'REJEITADA':
-        return BitmapDescriptor.hueRed;
-      default:
-        return BitmapDescriptor.hueRed;
+  void _applyFilters() {
+    ref.read(denunciasNotifierProvider.notifier).loadAllDenuncias(
+      status: _currentFilters?.status,
+      categoria: _currentFilters?.categoriaId,
+    );
+  }
+
+  List<DenunciaModel> _getFilteredDenuncias(List<DenunciaModel> denuncias) {
+    var filtered = denuncias;
+
+    // Filtro de busca textual (endereço apenas)
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((d) {
+        final searchLower = _searchQuery.toLowerCase();
+        return (d.endereco?.toLowerCase().contains(searchLower) ?? false);
+      }).toList();
     }
+
+    // Filtro de tempo (últimos X dias)
+    if (_currentFilters?.days != null) {
+      final now = DateTime.now();
+      final cutoffDate = now.subtract(Duration(days: _currentFilters!.days!));
+      filtered = filtered.where((d) {
+        return d.dataCriacao.isAfter(cutoffDate);
+      }).toList();
+    }
+
+    return filtered;
+  }
+
+  void _handleMarkerTap(DenunciaModel denuncia) {
+    context.push('/denuncia/${denuncia.id}');
   }
 
   @override
   Widget build(BuildContext context) {
     final denunciasState = ref.watch(denunciasNotifierProvider);
-    final denuncias = denunciasState.denuncias;
-
-    LatLng centerPosition = const LatLng(
-      -23.550520,
-      -46.633308,
-    ); // São Paulo padrão
-
-    if (denuncias.isNotEmpty) {
-      double sumLat = 0;
-      double sumLng = 0;
-      for (final denuncia in denuncias) {
-        sumLat += denuncia.latitude;
-        sumLng += denuncia.longitude;
-      }
-      centerPosition = LatLng(
-        sumLat / denuncias.length,
-        sumLng / denuncias.length,
-      );
-    }
+    final filteredDenuncias = _getFilteredDenuncias(denunciasState.denuncias);
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: const Text(
-          'Mapa de Denúncias',
-          style: TextStyle(
-            color: AppColors.navbarText,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.my_location, color: AppColors.navbarText),
-            onPressed: () {
-              if (_mapController != null) {
-                _mapController!.animateCamera(
-                  CameraUpdate.newLatLngZoom(centerPosition, 12),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: centerPosition,
-              zoom: 12,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Mapa - ocupa mais espaço
+            SizedBox(
+              height: screenHeight * 0.50,
+              child: MapSection(
+                denuncias: filteredDenuncias,
+                initialLat: widget.searchLat,
+                initialLng: widget.searchLng,
+                onMarkerTap: _handleMarkerTap,
+              ),
             ),
-            markers: _markers,
-            mapType: MapType.normal,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            onMapCreated: (controller) {
-              _mapController = controller;
-            },
-          ),
 
-          if (_isSearching)
-            Container(
-              color: Colors.black54,
-              child: const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.primaryRed,
+            // Componente da lista - sobrepõe o mapa com bordas arredondadas
+            Positioned(
+              top: screenHeight * 0.42, // Começa antes para sobrepor
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 70), // Espaço para a barra de busca
+
+                    // Lista de denúncias
+                    Expanded(
+                      child: MapDenunciasList(
+                        denuncias: filteredDenuncias,
+                        isLoading: denunciasState.isLoading,
+                        onRefresh: () {
+                          ref.read(denunciasNotifierProvider.notifier).loadAllDenuncias(
+                            status: _currentFilters?.status,
+                            categoria: _currentFilters?.categoriaId,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-                border: Border.all(color: AppColors.primaryRed, width: 1.5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Status',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.navbarText,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildLegendItem('Aguardando', Colors.orange),
-                  _buildLegendItem('Em Análise', Colors.blue),
-                  _buildLegendItem('Resolvida', Colors.green),
-                  _buildLegendItem('Rejeitada', Colors.red),
-                ],
-              ),
-            ),
-          ),
-
-          Positioned(
-            bottom: 16,
-            left: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primaryRed, width: 1.5),
-              ),
+            // Barra de busca + filtro - flutuando entre o mapa e o componente
+            Positioned(
+              top: screenHeight * 0.42 + 10, // Posicionada dentro do componente arredondado
+              left: 16,
+              right: 16,
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.location_on,
-                    size: 18,
-                    color: AppColors.primaryRed,
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF232229),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: AppColors.primaryRed,
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() => _searchQuery = value);
+                        },
+                        style: const TextStyle(color: AppColors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Buscar por cidade...',
+                          hintStyle: const TextStyle(
+                            color: AppColors.navbarText,
+                            fontSize: 16,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: AppColors.navbarText,
+                          ),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(
+                                    Icons.clear,
+                                    color: AppColors.navbarText,
+                                  ),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 15,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${denuncias.length} denúncias',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.navbarText,
+                  const SizedBox(width: AppSizes.spacing12),
+                  
+                  // Filter button
+                  Container(
+                    height: 56,
+                    width: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF232229),
+                      borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                      border: Border.all(
+                        color: AppColors.primaryRed,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Center(
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(
+                          Icons.filter_list,
+                          color: AppColors.primaryRed,
+                          size: 24,
+                        ),
+                        onPressed: _showFilters,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
-  }
-
-  Widget _buildLegendItem(String label, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 11, color: AppColors.navbarText),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _mapController?.dispose();
-    super.dispose();
   }
 }

@@ -13,11 +13,13 @@ import '../../features/autenticacao/presentation/views/guest_profile_screen.dart
 import '../../features/autenticacao/presentation/views/guest_settings_screen.dart';
 import '../../features/denuncias/presentation/views/create_denuncia_screen.dart';
 import '../../features/denuncias/presentation/views/denuncias_list_screen.dart';
+import '../../features/denuncias/presentation/views/denuncia_detail_screen.dart';
 import '../../features/navegacao/presentation/pages/home_page_new.dart';
 import '../../features/navegacao/presentation/pages/map_page.dart';
 import '../../features/navegacao/presentation/pages/settings_page.dart';
 import '../../features/navegacao/presentation/widgets/main_scaffold.dart';
 import '../../features/perfil/presentation/pages/profile_page.dart';
+import '../../features/perfil/presentation/pages/edit_profile_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -151,6 +153,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        path: '/denuncia/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return DenunciaDetailScreen(denunciaId: id);
+        },
+      ),
+      GoRoute(
         path: '/create-denuncia',
         builder: (context, state) => const CreateDenunciaScreen(),
       ),
@@ -158,6 +167,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/perfil',
         builder: (context, state) =>
             const MainScaffold(currentPath: '/perfil', child: ProfilePage()),
+      ),
+      GoRoute(
+        path: '/edit-profile',
+        builder: (context, state) => const EditProfileScreen(),
       ),
       GoRoute(
         path: '/settings',

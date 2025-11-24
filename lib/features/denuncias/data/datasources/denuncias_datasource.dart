@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http_parser/http_parser.dart';
 import '../../../../config/dio/dio_client.dart';
 import '../../../../core/exceptions/denuncia_exceptions.dart';
 import '../models/categoria_model.dart';
@@ -23,6 +24,7 @@ abstract class DenunciasDatasource {
     int pageSize = 10,
     String? status,
     int? categoria,
+    bool minhasDenuncias = false,
   });
 
   /// Busca detalhes de uma denúncia
@@ -55,8 +57,25 @@ class DenunciasDatasourceImpl implements DenunciasDatasource {
     try {
       final response = await _dio.get('/api/denuncias/categorias/');
 
+      print('📋 Response getCategorias:');
+      print('   Status: ${response.statusCode}');
+      print('   Data type: ${response.data.runtimeType}');
+
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data as List<dynamic>;
+        // Backend pode retornar lista paginada {results: []} ou lista direta []
+        final List<dynamic> data;
+        
+        if (response.data is Map) {
+          // Resposta paginada: {count, next, previous, results: [...]}
+          print('   Resposta paginada detectada');
+          data = response.data['results'] as List<dynamic>;
+        } else {
+          // Lista direta: [...]
+          print('   Lista direta detectada');
+          data = response.data as List<dynamic>;
+        }
+        
+        print('   Lista com ${data.length} categorias');
         return data
             .map((json) => CategoriaModel.fromJson(json as Map<String, dynamic>))
             .toList();
@@ -66,7 +85,13 @@ class DenunciasDatasourceImpl implements DenunciasDatasource {
         );
       }
     } on DioException catch (e) {
+      print('❌ Erro DioException em getCategorias: ${e.type} - ${e.message}');
+      print('   Response: ${e.response?.data}');
       throw _handleDioException(e);
+    } catch (e, stackTrace) {
+      print('❌ Erro genérico em getCategorias: $e');
+      print('   StackTrace: $stackTrace');
+      rethrow;
     }
   }
 
@@ -74,25 +99,102 @@ class DenunciasDatasourceImpl implements DenunciasDatasource {
   Future<DenunciaResponse> createDenuncia(CreateDenunciaRequest request) async {
     try {
       // Prepara FormData para multipart/form-data
-      final formData = FormData.fromMap(request.toFormData());
+      final formDataMap = request.toFormData();
+      print('\n🔍 FormData antes do Dio.fromMap:');
+      print('   Campos: ${formDataMap.keys.join(", ")}');
+      print('   Contém autor_convidado? ${formDataMap.containsKey("autor_convidado")}');
+      if (formDataMap.containsKey('autor_convidado')) {
+        print('   Valor de autor_convidado: "${formDataMap['autor_convidado']}"');
+      }
+      
+      final formData = FormData.fromMap(formDataMap);
+      print('✅ FormData.fromMap() criado com sucesso');
 
       // Adiciona foto se existir
       if (request.foto != null) {
+        print('📸 Preparando upload da foto...');
+        print('   Path: ${request.foto!.path}');
+        
+        // Verifica se o arquivo existe
+        final fileExists = await request.foto!.exists();
+        print('   Arquivo existe: $fileExists');
+        
+        if (!fileExists) {
+          throw Exception('Arquivo de foto não encontrado: ${request.foto!.path}');
+        }
+        
+        // Verifica tamanho do arquivo
+        final fileSize = await request.foto!.length();
+        print('   Tamanho do arquivo: ${fileSize} bytes (${(fileSize / 1024).toStringAsFixed(2)} KB)');
+        
+        final originalFileName = request.foto!.path.split('/').last;
+        print('   Nome original: $originalFileName');
+        
+        final extension = originalFileName.split('.').last.toLowerCase();
+        print('   Extensão: $extension');
+        
+        // Gerar nome curto para evitar erro de varchar(100)
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final fileName = 'img_$timestamp.$extension';
+        print('   Nome final (curto): $fileName');
+        
+        // Define o contentType baseado na extensão
+        MediaType contentType;
+        if (extension == 'png') {
+          contentType = MediaType('image', 'png');
+          print('   ContentType: image/png');
+        } else if (extension == 'jpg' || extension == 'jpeg') {
+          contentType = MediaType('image', 'jpeg');
+          print('   ContentType: image/jpeg');
+        } else {
+          contentType = MediaType('image', 'jpeg'); // Default
+          print('   ContentType: image/jpeg (default)');
+          print('   ⚠️ Extensão não reconhecida: $extension');
+        }
+        
         formData.files.add(
           MapEntry(
             'foto',
             await MultipartFile.fromFile(
               request.foto!.path,
-              filename: request.foto!.path.split('/').last,
+              filename: fileName,
+              contentType: contentType,
             ),
           ),
         );
+        
+        print('✅ Foto adicionada ao FormData');
+      } else {
+        print('ℹ️ Nenhuma foto para upload');
       }
+
+      // Log completo do FormData antes de enviar
+      print('\n🔍 === INSPEÇÃO FINAL DO FORMDATA ===');
+      print('📦 Campos (${formData.fields.length}):');
+      for (var field in formData.fields) {
+        print('   ${field.key}: "${field.value}"');
+      }
+      print('📸 Arquivos (${formData.files.length}):');
+      for (var file in formData.files) {
+        print('   ${file.key}:');
+        print('      filename: ${file.value.filename}');
+        print('      contentType: ${file.value.contentType}');
+        print('      length: ${file.value.length}');
+      }
+      print('====================================\n');
 
       final response = await _dio.post(
         '/api/denuncias/denuncias/',
         data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          validateStatus: (status) => status! < 600, // Não lançar exceção, ver resposta
+        ),
       );
+      
+      print('📊 Status recebido: ${response.statusCode}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('📝 Resposta da criação de denúncia:');
@@ -118,6 +220,7 @@ class DenunciasDatasourceImpl implements DenunciasDatasource {
     int pageSize = 10,
     String? status,
     int? categoria,
+    bool minhasDenuncias = false,
   }) async {
     try {
       final queryParams = <String, dynamic>{
@@ -131,6 +234,10 @@ class DenunciasDatasourceImpl implements DenunciasDatasource {
 
       if (categoria != null) {
         queryParams['categoria'] = categoria;
+      }
+      
+      if (minhasDenuncias) {
+        queryParams['minhas'] = 'true';
       }
 
       final response = await _dio.get(

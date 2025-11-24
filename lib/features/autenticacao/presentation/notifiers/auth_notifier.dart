@@ -1,15 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthState {
   final bool isLoggedIn;
   final bool isGuest; // Visitante (pode criar denúncias sem login)
   final String? guestNickname; // Apelido do visitante
+  final String? username; // Nome de usuário (logado)
+  final String? firstName; // Primeiro nome (logado)
 
   AuthState({
     required this.isLoggedIn,
     this.isGuest = false,
     this.guestNickname,
+    this.username,
+    this.firstName,
   });
 
   bool get hasAccess => isLoggedIn || isGuest;
@@ -27,8 +32,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final accessToken = await _storage.read(key: 'access_token');
 
     if (accessToken != null && accessToken.isNotEmpty) {
+      try {
+        // Decodifica o JWT para extrair informações do usuário
+        final decodedToken = JwtDecoder.decode(accessToken);
+        final username = decodedToken['username'] as String?;
+        final firstName = decodedToken['first_name'] as String?;
 
-      state = AuthState(isLoggedIn: true, isGuest: false);
+        state = AuthState(
+          isLoggedIn: true,
+          isGuest: false,
+          username: username,
+          firstName: firstName,
+        );
+      } catch (e) {
+        // Se falhar ao decodificar, apenas marca como logado sem dados extras
+        state = AuthState(isLoggedIn: true, isGuest: false);
+      }
       return;
     }
 
@@ -49,7 +68,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> login() async {
 
     await _storage.delete(key: 'guest_nickname');
-    state = AuthState(isLoggedIn: true, isGuest: false);
+    // Recarrega o estado para pegar as informações do token JWT
+    await _loadAuthState();
   }
 
   Future<void> logout() async {

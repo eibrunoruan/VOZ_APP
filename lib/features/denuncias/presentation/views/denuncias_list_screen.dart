@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../autenticacao/presentation/notifiers/auth_notifier.dart';
 import '../notifiers/denuncias_notifier.dart';
 import '../widgets/denuncia_card.dart';
 import 'denuncia_detail_screen.dart';
@@ -19,6 +21,7 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
   final _scrollController = ScrollController();
+  Timer? _debounceTimer;
 
   final List<Map<String, String?>> _filters = [
     {'label': 'Todas', 'value': null},
@@ -33,17 +36,41 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     
-    // Carrega denúncias ao abrir a tela
+    // Listener para debounce na busca
+    _searchController.addListener(_onSearchChanged);
+    
+    // Carrega denúncias ao abrir a tela (apenas para usuários autenticados)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(denunciasNotifierProvider.notifier).loadDenuncias();
+      final authState = ref.read(authNotifierProvider);
+      
+      // Só carrega se estiver autenticado (não guest)
+      if (authState.isLoggedIn && !authState.isGuest) {
+        ref.read(denunciasNotifierProvider.notifier).loadDenuncias();
+      }
     });
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    // Cancela timer anterior se existir
+    _debounceTimer?.cancel();
+    
+    // Cria novo timer de 500ms
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      if (_searchController.text != _searchQuery) {
+        setState(() {
+          _searchQuery = _searchController.text;
+        });
+      }
+    });
   }
 
   void _onScroll() {
@@ -140,6 +167,8 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
 
     // Filtra localmente apenas por busca de texto
     var filteredDenuncias = denunciasState.denuncias;
+    
+    // Filtro de busca textual
     if (_searchQuery.isNotEmpty) {
       filteredDenuncias = filteredDenuncias.where((d) {
         return d.titulo.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -241,8 +270,7 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
                       ),
                       child: TextField(
                         controller: _searchController,
-                        onChanged: (value) =>
-                            setState(() => _searchQuery = value),
+                        // onChanged removido - usando listener com debounce
                         style: const TextStyle(color: AppColors.white),
                         decoration: InputDecoration(
                           hintText: 'Pesquisar denúncias...',
@@ -312,6 +340,63 @@ class _DenunciasListScreenState extends ConsumerState<DenunciasListScreen> {
   }
 
   Widget _buildContent(DenunciasState state, List<dynamic> filteredDenuncias) {
+    // Verificar se é usuário guest
+    final authState = ref.watch(authNotifierProvider);
+    
+    if (authState.isGuest || !authState.isLoggedIn) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.spacing24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.login,
+                size: 80,
+                color: AppColors.grey,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Faça login para ver suas denúncias',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.navbarText,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Você precisa estar autenticado para acessar esta seção',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () => context.go('/login'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryRed,
+                  foregroundColor: AppColors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+                icon: const Icon(Icons.login),
+                label: const Text(
+                  'Fazer Login',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
     // Loading inicial
     if (state.isLoading && state.denuncias.isEmpty) {
       return const Center(child: CircularProgressIndicator());

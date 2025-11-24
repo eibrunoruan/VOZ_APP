@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/services/image_compression_service.dart';
 import '../../data/models/create_denuncia_request.dart';
+import '../../../autenticacao/presentation/notifiers/auth_notifier.dart';
 import '../controllers/create_denuncia_controller.dart';
 import '../notifiers/denuncias_notifier.dart';
 import 'location_service.dart';
@@ -47,6 +49,25 @@ class SubmitDenunciaService {
   /// Processa o submit da denúncia
   Future<SubmitResult> submit() async {
     try {
+      // Comprime a imagem se existir
+      var fotoParaEnviar = controller.selectedFoto;
+      if (fotoParaEnviar != null) {
+        print('📸 Comprimindo imagem antes do upload...');
+        final compressedImage = await ImageCompressionService.compressImage(
+          fotoParaEnviar,
+          quality: 70,
+          maxWidth: 1024,
+          maxHeight: 1024,
+        );
+        
+        if (compressedImage != null) {
+          fotoParaEnviar = compressedImage;
+          print('✅ Imagem comprimida - pronta para upload');
+        } else {
+          print('⚠️ Falha na compressão - usando imagem original');
+        }
+      }
+
       // Analisa localização
       final locationService = ref.read(locationServiceProvider);
       final location = await locationService.analyzeLocation(
@@ -57,6 +78,18 @@ class SubmitDenunciaService {
       // Arredonda coordenadas
       final latitudeArredondada = LocationService.roundCoordinate(controller.selectedLat!);
       final longitudeArredondada = LocationService.roundCoordinate(controller.selectedLng!);
+
+      // Obtém o nome do convidado se for usuário guest
+      final authState = ref.read(authNotifierProvider);
+      final nomeConvidado = authState.isGuest ? authState.guestNickname : null;
+      
+      print('\n🔐 === ESTADO DE AUTENTICAÇÃO ===');
+      print('   isLoggedIn: ${authState.isLoggedIn}');
+      print('   isGuest: ${authState.isGuest}');
+      print('   guestNickname: ${authState.guestNickname}');
+      print('   hasAccess: ${authState.hasAccess}');
+      print('   nomeConvidado a enviar: ${nomeConvidado ?? "(null)"}');
+      print('================================\n');
 
       // Cria request
       final request = CreateDenunciaRequest(
@@ -71,7 +104,8 @@ class SubmitDenunciaService {
             ? controller.localizacaoController.text.trim()
             : null,
         jurisdicao: location.jurisdicao ?? 'MUNICIPAL',
-        foto: controller.selectedFoto,
+        foto: fotoParaEnviar, // Usa imagem comprimida
+        nomeConvidado: nomeConvidado,
       );
 
       // Envia para API

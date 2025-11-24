@@ -16,6 +16,7 @@ abstract class DenunciasRepository {
     int pageSize = 10,
     String? status,
     int? categoria,
+    bool minhasDenuncias = false,
   });
   Future<DenunciaModel> getDenunciaById(int id);
   Future<DenunciaModel> updateDenuncia(int id, Map<String, dynamic> data);
@@ -47,12 +48,14 @@ class DenunciasRepositoryImpl implements DenunciasRepository {
     int pageSize = 10,
     String? status,
     int? categoria,
+    bool minhasDenuncias = false,
   }) async {
     return await _datasource.getDenuncias(
       page: page,
       pageSize: pageSize,
       status: status,
       categoria: categoria,
+      minhasDenuncias: minhasDenuncias,
     );
   }
 

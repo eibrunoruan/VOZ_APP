@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/exceptions/denuncia_exceptions.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/confirmation_bottom_sheet.dart';
+import '../../../autenticacao/presentation/notifiers/auth_notifier.dart';
+import '../../../perfil/presentation/notifiers/profile_notifier.dart';
 import '../notifiers/denuncias_notifier.dart';
 
 class DenunciaDetailScreen extends ConsumerStatefulWidget {
@@ -69,6 +72,183 @@ class _DenunciaDetailScreenState extends ConsumerState<DenunciaDetailScreen> {
       return Icons.lightbulb_outlined;
     } else {
       return Icons.report_outlined;
+    }
+  }
+
+  String _getAuthorName(denuncia) {
+    // Se eh_autor for true, usa os dados do perfil atual
+    if (denuncia.ehAutor == true) {
+      final authState = ref.read(authNotifierProvider);
+      final profileState = ref.read(profileNotifierProvider);
+      
+      // Para guests
+      if (authState.isGuest) {
+        return authState.guestNickname ?? 'Você';
+      }
+      
+      // Para usuários logados
+      if (profileState.profile != null) {
+        final profile = profileState.profile!;
+        return profile.firstName.isNotEmpty ? profile.firstName : profile.username;
+      }
+      
+      // Fallback para dados do JWT
+      return authState.firstName ?? authState.username ?? 'Você';
+    }
+    
+    // Se não for o autor, usa os dados da denúncia
+    return denuncia.autorUsername ?? denuncia.autorConvidado ?? 'Anônimo';
+  }
+
+  Future<void> _showActionsMenu(BuildContext context) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
+          decoration: const BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(AppSizes.spacing24),
+              topRight: Radius.circular(AppSizes.spacing24),
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: AppSizes.spacing12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing32),
+
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.settings,
+                    size: 40,
+                    color: AppColors.primaryRed,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing24),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacing24,
+                  ),
+                  child: Text(
+                    'Ações da Denúncia',
+                    style: AppTextStyles.titleMedium.copyWith(fontSize: 24),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing12),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacing32,
+                  ),
+                  child: Text(
+                    'Escolha uma ação para esta denúncia',
+                    style: AppTextStyles.body.copyWith(height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing32),
+
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSizes.spacing24,
+                    AppSizes.spacing24,
+                    AppSizes.spacing24,
+                    AppSizes.spacing24 +
+                        MediaQuery.of(context).viewPadding.bottom,
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppSizes.buttonHeight,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop('deletar'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.error,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.borderRadius,
+                              ),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Deletar Denúncia',
+                            style: AppTextStyles.button.copyWith(
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: AppSizes.spacing12),
+                      
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppSizes.buttonHeight,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(context).pop('resolver'),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                              color: AppColors.primaryRed,
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.borderRadius,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Marcar como Resolvida',
+                            style: AppTextStyles.button.copyWith(
+                              color: AppColors.primaryRed,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (action == 'resolver') {
+      _handleResolver();
+    } else if (action == 'deletar') {
+      _handleDeletar();
     }
   }
 
@@ -277,53 +457,11 @@ class _DenunciaDetailScreenState extends ConsumerState<DenunciaDetailScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.navbarText),
           onPressed: () => context.pop(),
         ),
-        title: denunciaAsync.when(
-          data: (denuncia) => Text(
-            denuncia.titulo,
-            style: const TextStyle(
-              color: AppColors.navbarText,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          loading: () => const Text('Carregando...'),
-          error: (_, __) => const Text('Erro'),
-        ),
         actions: [
           if (denunciaAsync.hasValue && !_isProcessing)
-            PopupMenuButton<String>(
+            IconButton(
               icon: const Icon(Icons.more_vert, color: AppColors.navbarText),
-              color: AppColors.background,
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'resolver',
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.green),
-                      SizedBox(width: 12),
-                      Text('Marcar como resolvida', style: TextStyle(color: AppColors.white)),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'deletar',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: AppColors.error),
-                      SizedBox(width: 12),
-                      Text('Deletar', style: TextStyle(color: AppColors.white)),
-                    ],
-                  ),
-                ),
-              ],
-              onSelected: (value) {
-                print('🔘 Menu selecionado: $value');
-                if (value == 'resolver') {
-                  _handleResolver();
-                } else if (value == 'deletar') {
-                  _handleDeletar();
-                }
-              },
+              onPressed: () => _showActionsMenu(context),
             ),
         ],
       ),
@@ -377,24 +515,79 @@ class _DenunciaDetailScreenState extends ConsumerState<DenunciaDetailScreen> {
         children: [
           // Foto (se houver)
           if (denuncia.foto != null)
-            Container(
-              height: 300,
-              color: AppColors.black,
-              child: Image.network(
-                denuncia.foto!,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: const Color(0xFF232229),
-                    child: const Center(
-                      child: Icon(
-                        Icons.image_not_supported,
-                        size: 80,
-                        color: AppColors.grey,
-                      ),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => _FullScreenImage(
+                      imageUrl: denuncia.foto!,
+                      heroTag: 'denuncia-${denuncia.id}',
                     ),
-                  );
-                },
+                  ),
+                );
+              },
+              child: Hero(
+                tag: 'denuncia-${denuncia.id}',
+                child: Container(
+                  height: 300,
+                  color: AppColors.black,
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Image.network(
+                          denuncia.foto!,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                color: AppColors.primaryRed,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: const Color(0xFF232229),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 80,
+                                  color: AppColors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.zoom_in, color: Colors.white, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                'Toque para ampliar',
+                                style: TextStyle(color: Colors.white, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
 
@@ -474,7 +667,7 @@ class _DenunciaDetailScreenState extends ConsumerState<DenunciaDetailScreen> {
                 _buildInfoRow(
                   Icons.person_outline,
                   'Autor',
-                  denuncia.autorUsername ?? 'Anônimo',
+                  _getAuthorName(denuncia),
                 ),
                 const SizedBox(height: 12),
                 _buildInfoRow(
@@ -578,6 +771,8 @@ class _DenunciaDetailScreenState extends ConsumerState<DenunciaDetailScreen> {
               color: AppColors.navbarText,
               fontWeight: FontWeight.w600,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -586,6 +781,18 @@ class _DenunciaDetailScreenState extends ConsumerState<DenunciaDetailScreen> {
 
   Widget _buildBottomBar(denuncia) {
     final jaApoiou = denuncia.usuarioApoiou;
+    
+    // Usa o campo eh_autor do backend se disponível
+    // Senão, faz verificação manual para guests
+    bool ehAutor = denuncia.ehAutor ?? false;
+    
+    if (!ehAutor) {
+      // Verificação adicional para guests (caso backend não envie eh_autor)
+      final authState = ref.watch(authNotifierProvider);
+      if (authState.isGuest && denuncia.autorConvidado != null) {
+        ehAutor = denuncia.autorConvidado == authState.guestNickname;
+      }
+    }
 
     return Container(
       padding: const EdgeInsets.all(AppSizes.spacing16),
@@ -604,9 +811,9 @@ class _DenunciaDetailScreenState extends ConsumerState<DenunciaDetailScreen> {
           width: double.infinity,
           height: 50,
           child: ElevatedButton.icon(
-            onPressed: _isProcessing || jaApoiou ? null : _handleApoiar,
+            onPressed: _isProcessing || jaApoiou || ehAutor ? null : _handleApoiar,
             style: ElevatedButton.styleFrom(
-              backgroundColor: jaApoiou ? AppColors.grey : AppColors.primaryRed,
+              backgroundColor: (jaApoiou || ehAutor) ? AppColors.grey : AppColors.primaryRed,
               foregroundColor: Colors.white,
               disabledBackgroundColor: AppColors.grey,
               shape: RoundedRectangleBorder(
@@ -622,12 +829,122 @@ class _DenunciaDetailScreenState extends ConsumerState<DenunciaDetailScreen> {
                       strokeWidth: 2,
                     ),
                   )
-                : Icon(jaApoiou ? Icons.check_circle : Icons.people),
+                : Icon(ehAutor ? Icons.block : (jaApoiou ? Icons.check_circle : Icons.people)),
             label: Text(
-              jaApoiou ? 'Você já apoiou' : 'Apoiar Denúncia',
+              ehAutor ? 'Sua denúncia' : (jaApoiou ? 'Você já apoiou' : 'Apoiar Denúncia'),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Widget de tela cheia para visualizar imagem com zoom
+class _FullScreenImage extends StatefulWidget {
+  final String imageUrl;
+  final String heroTag;
+
+  const _FullScreenImage({
+    required this.imageUrl,
+    required this.heroTag,
+  });
+
+  @override
+  State<_FullScreenImage> createState() => _FullScreenImageState();
+}
+
+class _FullScreenImageState extends State<_FullScreenImage> {
+  final TransformationController _transformationController = TransformationController();
+  TapDownDetails? _doubleTapDetails;
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  void _handleDoubleTapDown(TapDownDetails details) {
+    _doubleTapDetails = details;
+  }
+
+  void _handleDoubleTap() {
+    if (_transformationController.value != Matrix4.identity()) {
+      _transformationController.value = Matrix4.identity();
+    } else {
+      final position = _doubleTapDetails!.localPosition;
+      _transformationController.value = Matrix4.identity()
+        ..translate(-position.dx * 2, -position.dy * 2)
+        ..scale(3.0);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+          'Foto da Denúncia',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+      body: GestureDetector(
+        onDoubleTapDown: _handleDoubleTapDown,
+        onDoubleTap: _handleDoubleTap,
+        child: Center(
+          child: Hero(
+            tag: widget.heroTag,
+            child: InteractiveViewer(
+              transformationController: _transformationController,
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Image.network(
+                widget.imageUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                      color: AppColors.primaryRed,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.broken_image,
+                          size: 100,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Erro ao carregar imagem',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ),

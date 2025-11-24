@@ -58,7 +58,52 @@ class DenunciasNotifier extends StateNotifier<DenunciasState> {
 
   DenunciasNotifier(this._repository) : super(const DenunciasState());
 
-  /// Carrega denúncias (primeira página)
+  /// Carrega TODAS as denúncias (para o mapa)
+  Future<void> loadAllDenuncias({
+    String? status,
+    int? categoria,
+    bool forceRefresh = false,
+  }) async {
+    // Se já está carregando, não faz nada
+    if (state.isLoading) return;
+
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      clearError: true,
+      statusFilter: status,
+      categoriaFilter: categoria,
+    );
+
+    try {
+      final result = await _repository.getDenuncias(
+        page: 1,
+        status: status,
+        categoria: categoria,
+        minhasDenuncias: false, // Carrega TODAS as denúncias
+      );
+
+      state = state.copyWith(
+        denuncias: result.results,
+        isLoading: false,
+        currentPage: 1,
+        hasMore: result.hasMore,
+        clearError: true,
+      );
+    } on DenunciaException catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.message,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Erro ao carregar denúncias',
+      );
+    }
+  }
+
+  /// Carrega denúncias DO USUÁRIO (para lista "Minhas Denúncias")
   Future<void> loadDenuncias({
     String? status,
     int? categoria,
@@ -80,6 +125,7 @@ class DenunciasNotifier extends StateNotifier<DenunciasState> {
         page: 1,
         status: status,
         categoria: categoria,
+        minhasDenuncias: true, // Apenas denúncias do usuário
       );
 
       state = state.copyWith(
@@ -114,6 +160,7 @@ class DenunciasNotifier extends StateNotifier<DenunciasState> {
         page: nextPage,
         status: state.statusFilter,
         categoria: state.categoriaFilter,
+        minhasDenuncias: true, // Sempre filtrar para usuário atual
       );
 
       state = state.copyWith(

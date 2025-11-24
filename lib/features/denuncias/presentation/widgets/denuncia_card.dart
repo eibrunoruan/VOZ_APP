@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -72,6 +73,227 @@ class DenunciaCard extends ConsumerWidget {
     final endereco = denuncia.endereco ?? '';
     final parts = endereco.split(RegExp(r'[,\-]'));
     return parts.isNotEmpty ? parts.last.trim() : endereco;
+  }
+  
+  String _getLocationDisplay() {
+    // Prioridade: endereco → cidadeNome/estadoNome → fallback
+    if (denuncia.endereco != null && denuncia.endereco!.isNotEmpty) {
+      // Verifica se não é apenas coordenadas (formato: "numero, numero")
+      final endereco = denuncia.endereco!.trim();
+      final coordPattern = RegExp(r'^-?\d+\.?\d*,\s*-?\d+\.?\d*$');
+      
+      if (!coordPattern.hasMatch(endereco)) {
+        return endereco; // É um endereço válido
+      }
+    }
+    
+    // Fallback para cidade/estado
+    if (denuncia.cidadeNome != null && denuncia.estadoNome != null) {
+      return '${denuncia.cidadeNome}, ${denuncia.estadoNome}';
+    } else if (denuncia.cidadeNome != null) {
+      return denuncia.cidadeNome!;
+    }
+    
+    return 'Localização não informada';
+  }
+
+  Future<void> _showActionsMenu(BuildContext context, WidgetRef ref) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
+          decoration: const BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(AppSizes.spacing24),
+              topRight: Radius.circular(AppSizes.spacing24),
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: AppSizes.spacing12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing32),
+
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.settings,
+                    size: 40,
+                    color: AppColors.primaryRed,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing24),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacing24,
+                  ),
+                  child: Text(
+                    'Ações da Denúncia',
+                    style: AppTextStyles.titleMedium.copyWith(fontSize: 24),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing12),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.spacing32,
+                  ),
+                  child: Text(
+                    'Escolha uma ação para esta denúncia',
+                    style: AppTextStyles.body.copyWith(height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.spacing32),
+
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSizes.spacing24,
+                    AppSizes.spacing24,
+                    AppSizes.spacing24,
+                    AppSizes.spacing24 +
+                        MediaQuery.of(context).viewPadding.bottom,
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppSizes.buttonHeight,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop('deletar'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.error,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.borderRadius,
+                              ),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Deletar Denúncia',
+                            style: AppTextStyles.button.copyWith(
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: AppSizes.spacing12),
+                      
+                      SizedBox(
+                        width: double.infinity,
+                        height: AppSizes.buttonHeight,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(context).pop('resolver'),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                              color: AppColors.primaryRed,
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.borderRadius,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Marcar como Resolvida',
+                            style: AppTextStyles.button.copyWith(
+                              color: AppColors.primaryRed,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (action == 'resolver') {
+      _handleResolver(context, ref);
+    } else if (action == 'deletar') {
+      _handleDelete(context, ref);
+    }
+  }
+
+  Future<void> _handleResolver(BuildContext context, WidgetRef ref) async {
+    final confirm = await ConfirmationBottomSheet.show(
+      context: context,
+      title: 'Marcar como Resolvida',
+      message: 'Deseja marcar esta denúncia como resolvida?',
+      icon: Icons.check_circle,
+      iconColor: Colors.green,
+      confirmText: 'Confirmar',
+      cancelText: 'Cancelar',
+      isDanger: false,
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await ref
+          .read(denunciasNotifierProvider.notifier)
+          .resolverDenuncia(denuncia.id);
+
+      if (!context.mounted) return;
+
+      await ConfirmationBottomSheet.show(
+        context: context,
+        title: 'Denúncia Resolvida!',
+        message: 'A denúncia foi marcada como resolvida com sucesso.',
+        icon: Icons.check_circle_rounded,
+        iconColor: Colors.green,
+        confirmText: 'OK',
+        cancelText: '',
+        isDanger: false,
+      );
+    } on DenunciaException catch (e) {
+      if (!context.mounted) return;
+
+      await ConfirmationBottomSheet.show(
+        context: context,
+        title: 'Erro',
+        message: e.message,
+        icon: Icons.error_outline,
+        iconColor: AppColors.error,
+        confirmText: 'OK',
+        cancelText: '',
+        isDanger: true,
+      );
+    }
   }
 
   Future<void> _handleDelete(BuildContext context, WidgetRef ref) async {
@@ -156,7 +378,6 @@ class DenunciaCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dateTimeFormat = DateFormat('dd/MM/yyyy \'às\' HH:mm');
     final statusColor = _getStatusColor();
-    final cityName = _extractCity();
 
     return Material(
       color: Colors.transparent,
@@ -208,7 +429,7 @@ class DenunciaCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          denuncia.endereco ?? denuncia.cidadeNome ?? 'Localização não informada',
+                          _getLocationDisplay(),
                           style: const TextStyle(
                             fontSize: 16,
                             color: AppColors.navbarText,
@@ -238,7 +459,7 @@ class DenunciaCard extends ConsumerWidget {
                       color: AppColors.navbarText,
                       size: 24,
                     ),
-                    onPressed: () => _handleDelete(context, ref),
+                    onPressed: () => _showActionsMenu(context, ref),
                   ),
                 ],
               ),

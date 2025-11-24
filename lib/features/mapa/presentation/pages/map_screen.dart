@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../denuncias/presentation/notifiers/denuncias_notifier.dart';
 import '../../../denuncias/presentation/views/denuncia_detail_screen.dart';
@@ -15,14 +16,64 @@ class MapScreen extends ConsumerStatefulWidget {
 class _MapScreenState extends ConsumerState<MapScreen> {
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
+  LatLng? _userLocation;
+  bool _isLoadingLocation = true;
 
   @override
   void initState() {
     super.initState();
-    // Carrega denúncias ao abrir o mapa
+    _getUserLocation();
+    // Carrega TODAS as denúncias ao abrir o mapa (não só do usuário)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(denunciasNotifierProvider.notifier).loadDenuncias();
+      ref.read(denunciasNotifierProvider.notifier).loadAllDenuncias();
     });
+  }
+  
+  Future<void> _getUserLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          setState(() => _isLoadingLocation = false);
+        }
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            setState(() => _isLoadingLocation = false);
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          setState(() => _isLoadingLocation = false);
+        }
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        setState(() {
+          _userLocation = LatLng(position.latitude, position.longitude);
+          _isLoadingLocation = false;
+        });
+        
+        // Centraliza o mapa na localização do usuário
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLngZoom(_userLocation!, 14),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingLocation = false);
+      }
+    }
   }
 
   @override
@@ -31,8 +82,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _createMarkers();
   }
 
-  void _createMarkers() {
-    final denunciasState = ref.read(denunciasNotifierProvider);
+  Set<Marker> _buildMarkers() {
+    final denunciasState = ref.watch(denunciasNotifierProvider);
     final markers = <Marker>{};
 
     for (final denuncia in denunciasState.denuncias) {
@@ -60,6 +111,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       );
     }
 
+    return markers;
+  }
+
+  void _createMarkers() {
+    // Deprecated - agora usando _buildMarkers() com lazy loading
+    final markers = _buildMarkers();
     if (mounted) {
       setState(() {
         _markers = markers;
@@ -93,23 +150,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     final denuncias = denunciasState.denuncias;
 
-    LatLng centerPosition = const LatLng(
+    // Usa localização do usuário se disponível, senão usa São Paulo
+    LatLng centerPosition = _userLocation ?? const LatLng(
       -23.550520,
       -46.633308,
-    ); // São Paulo padrão
-
-    if (denuncias.isNotEmpty) {
-      double sumLat = 0;
-      double sumLng = 0;
-      for (final denuncia in denuncias) {
-        sumLat += denuncia.latitude;
-        sumLng += denuncia.longitude;
-      }
-      centerPosition = LatLng(
-        sumLat / denuncias.length,
-        sumLng / denuncias.length,
-      );
-    }
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -127,12 +172,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.my_location, color: AppColors.navbarText),
-            onPressed: () {
-
-              if (_mapController != null) {
+            onPressed: () async {
+              if (_userLocation != null && _mapController != null) {
                 _mapController!.animateCamera(
-                  CameraUpdate.newLatLngZoom(centerPosition, 12),
+                  CameraUpdate.newLatLngZoom(_userLocation!, 14),
                 );
+              } else {
+                // Tenta obter localização novamente
+                await _getUserLocation();
               }
             },
           ),
@@ -146,11 +193,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               target: centerPosition,
               zoom: 12,
             ),
-            markers: _markers,
+            markers: _buildMarkers(),
             mapType: MapType.normal,
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
+            // Otimizações de performance
+            buildingsEnabled: false,
+            trafficEnabled: false,
+            indoorViewEnabled: false,
+            minMaxZoomPreference: const MinMaxZoomPreference(10, 18),
             onMapCreated: (controller) {
               _mapController = controller;
             },

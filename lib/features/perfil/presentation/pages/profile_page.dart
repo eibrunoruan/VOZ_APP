@@ -4,9 +4,27 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/confirmation_bottom_sheet.dart';
 import '../../../autenticacao/presentation/notifiers/auth_notifier.dart';
+import '../notifiers/profile_notifier.dart';
 
-class ProfilePage extends ConsumerWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  @override
+  void initState() {
+    super.initState();
+    // Carrega perfil do usuário ao abrir a tela
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = ref.read(authNotifierProvider);
+      if (authState.isLoggedIn && !authState.isGuest) {
+        ref.read(profileNotifierProvider.notifier).loadProfile();
+      }
+    });
+  }
 
   Future<void> _showLogoutModal(BuildContext context, WidgetRef ref) async {
     final confirm = await ConfirmationBottomSheet.show(
@@ -57,10 +75,31 @@ class ProfilePage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
+    final profileState = ref.watch(profileNotifierProvider);
     final isGuest = authState.isGuest;
-    final displayName = authState.guestNickname ?? 'Usuário';
+    
+    // Para guests, usa o nickname
+    // Para usuários logados, usa dados do perfil ou fallback do JWT
+    String displayName;
+    String username;
+    
+    if (isGuest) {
+      displayName = authState.guestNickname ?? 'Visitante';
+      username = '@visitante';
+    } else if (profileState.profile != null) {
+      // Dados do /me endpoint (prioritário)
+      final profile = profileState.profile!;
+      displayName = profile.firstName.isNotEmpty 
+          ? profile.firstName 
+          : profile.username;
+      username = '@${profile.username}';
+    } else {
+      // Fallback para dados do JWT (enquanto carrega)
+      displayName = authState.firstName ?? authState.username ?? 'Usuário';
+      username = '@${authState.username ?? 'usuario'}';
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -116,9 +155,7 @@ class ProfilePage extends ConsumerWidget {
               const SizedBox(height: AppSizes.spacing8),
 
               Text(
-                isGuest
-                    ? '@visitante'
-                    : '@${displayName.toLowerCase().replaceAll(' ', '_')}',
+                username,
                 style: AppTextStyles.subtitle,
               ),
 
@@ -135,12 +172,7 @@ class ProfilePage extends ConsumerWidget {
                         if (isGuest) {
                           context.push('/guest-settings');
                         } else {
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Edição de perfil em breve!'),
-                            ),
-                          );
+                          context.push('/edit-profile');
                         }
                       },
                       style: AppButtonStyles.primary,

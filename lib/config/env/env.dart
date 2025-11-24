@@ -7,7 +7,7 @@ abstract class Env {
     if (envUrl.isNotEmpty) return envUrl;
 
 
-    return 'http://192.168.1.12:8000';
+    return 'http://72.61.55.172:8000';
 
     /* Código original para detectar plataforma automaticamente:
     try {

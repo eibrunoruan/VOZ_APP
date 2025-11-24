@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/cidades_sc_provider.dart';
 
@@ -43,15 +44,15 @@ class _HomePageNewState extends ConsumerState<HomePageNew> {
                     children: [
 
                       Image.asset(
-                        'assets/images/vp-logo.png',
-                        height: 80,
+                        'assets/images/logo-voz-do-povo.png',
+                        height: 100,
                         fit: BoxFit.contain,
                       ),
 
                       IconButton(
                         icon: const Icon(
                           Icons.account_circle,
-                          color: AppColors.white,
+                          color: AppColors.background,
                           size: 40,
                         ),
                         onPressed: () => context.go('/perfil'),
@@ -59,10 +60,6 @@ class _HomePageNewState extends ConsumerState<HomePageNew> {
                     ],
                   ),
                 ),
-
-                const SizedBox(
-                  height: 30,
-                ), // Espaço para a barra de busca sobreposta
 
                 Expanded(
                   child: Container(
@@ -178,7 +175,7 @@ class _HomePageNewState extends ConsumerState<HomePageNew> {
 
             Positioned(
               top:
-                  165, // Posicionada para ficar metade no verde, metade no escuro
+                  165, // Posicionada para ficar metade no vermelho, metade no escuro
               left: 16,
               right: 16,
               child: Autocomplete<CidadeSC>(

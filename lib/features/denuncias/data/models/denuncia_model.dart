@@ -18,11 +18,13 @@ class DenunciaModel extends Equatable {
   final String status;
   final String? foto;
   final int totalApoios;
-  final int autor;
+  final int? autor; // Nullable para guests
   final String? autorUsername;
+  final String? autorConvidado; // Nome do guest
   final DateTime dataCriacao;
   final DateTime dataAtualizacao;
   final bool usuarioApoiou;
+  final bool? ehAutor; // Se o usuário atual é o autor
 
   const DenunciaModel({
     required this.id,
@@ -41,11 +43,13 @@ class DenunciaModel extends Equatable {
     required this.status,
     this.foto,
     required this.totalApoios,
-    required this.autor,
+    this.autor, // Nullable
     this.autorUsername,
+    this.autorConvidado, // Novo campo
     required this.dataCriacao,
     required this.dataAtualizacao,
     this.usuarioApoiou = false,
+    this.ehAutor,
   });
 
   factory DenunciaModel.fromJson(Map<String, dynamic> json) {
@@ -59,12 +63,14 @@ class DenunciaModel extends Equatable {
       throw Exception('Valor inválido para coordenada: $value');
     }
     
-    // Helper para parsear autor que pode vir como int ou objeto
-    int parseAutorId(dynamic value) {
-      if (value is int) {
+    // Helper para parsear autor que pode vir como int, objeto ou null
+    int? parseAutorId(dynamic value) {
+      if (value == null) {
+        return null; // Guest user
+      } else if (value is int) {
         return value;
       } else if (value is Map) {
-        return value['id'] as int;
+        return value['id'] as int?;
       }
       throw Exception('Valor inválido para autor: $value');
     }
@@ -96,12 +102,14 @@ class DenunciaModel extends Equatable {
       totalApoios: json['total_apoios'] as int? ?? 0,
       autor: parseAutorId(json['autor']),
       autorUsername: json['autor_username'] as String? ?? parseAutorUsername(json['autor']),
+      autorConvidado: json['autor_convidado'] as String?,
       dataCriacao: DateTime.parse(json['data_criacao'] as String),
       // data_atualizacao pode não existir em denúncias recém-criadas
       dataAtualizacao: json['data_atualizacao'] != null 
           ? DateTime.parse(json['data_atualizacao'] as String)
           : DateTime.parse(json['data_criacao'] as String),
       usuarioApoiou: json['usuario_apoiou'] as bool? ?? false,
+      ehAutor: json['eh_autor'] as bool?,
     );
   }
 
@@ -125,9 +133,11 @@ class DenunciaModel extends Equatable {
       'total_apoios': totalApoios,
       'autor': autor,
       'autor_username': autorUsername,
+      'autor_convidado': autorConvidado,
       'data_criacao': dataCriacao.toIso8601String(),
       'data_atualizacao': dataAtualizacao.toIso8601String(),
       'usuario_apoiou': usuarioApoiou,
+      'eh_autor': ehAutor,
     };
   }
 
@@ -151,9 +161,11 @@ class DenunciaModel extends Equatable {
     int? totalApoios,
     int? autor,
     String? autorUsername,
+    String? autorConvidado,
     DateTime? dataCriacao,
     DateTime? dataAtualizacao,
     bool? usuarioApoiou,
+    bool? ehAutor,
   }) {
     return DenunciaModel(
       id: id ?? this.id,
@@ -174,9 +186,11 @@ class DenunciaModel extends Equatable {
       totalApoios: totalApoios ?? this.totalApoios,
       autor: autor ?? this.autor,
       autorUsername: autorUsername ?? this.autorUsername,
+      autorConvidado: autorConvidado ?? this.autorConvidado,
       dataCriacao: dataCriacao ?? this.dataCriacao,
       dataAtualizacao: dataAtualizacao ?? this.dataAtualizacao,
       usuarioApoiou: usuarioApoiou ?? this.usuarioApoiou,
+      ehAutor: ehAutor ?? this.ehAutor,
     );
   }
 
@@ -200,8 +214,10 @@ class DenunciaModel extends Equatable {
         totalApoios,
         autor,
         autorUsername,
+        autorConvidado,
         dataCriacao,
         dataAtualizacao,
         usuarioApoiou,
+        ehAutor,
       ];
 }
