@@ -28,11 +28,13 @@ class _MapDenunciasListState extends ConsumerState<MapDenunciasList> {
   }
 
   Widget _buildContent() {
+    print(
+      '🗺️ MapDenunciasList: isLoading=${widget.isLoading}, denuncias=${widget.denuncias.length}',
+    );
+
     if (widget.isLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primaryRed,
-        ),
+        child: CircularProgressIndicator(color: AppColors.primaryRed),
       );
     }
 
@@ -43,18 +45,12 @@ class _MapDenunciasListState extends ConsumerState<MapDenunciasList> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.location_off,
-                size: 64,
-                color: AppColors.grey,
-              ),
+              const Icon(Icons.location_off, size: 64, color: AppColors.grey),
               const SizedBox(height: AppSizes.spacing16),
               Text(
                 'Nenhuma denúncia disponível',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.grey,
-                ),
+                style: AppTextStyles.body.copyWith(color: AppColors.grey),
               ),
             ],
           ),
@@ -62,9 +58,15 @@ class _MapDenunciasListState extends ConsumerState<MapDenunciasList> {
       );
     }
 
+    print(
+      '🗺️ MapDenunciasList: Renderizando ${widget.denuncias.length} cards',
+    );
+
     return RefreshIndicator(
       onRefresh: () async => widget.onRefresh(),
+      color: AppColors.primaryRed,
       child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(
           AppSizes.spacing16,
           0,
@@ -72,9 +74,7 @@ class _MapDenunciasListState extends ConsumerState<MapDenunciasList> {
           AppSizes.spacing16,
         ),
         itemCount: widget.denuncias.length,
-        separatorBuilder: (_, __) => const SizedBox(
-          height: AppSizes.spacing16,
-        ),
+        separatorBuilder: (_, __) => const SizedBox(height: AppSizes.spacing16),
         itemBuilder: (context, index) {
           final denuncia = widget.denuncias[index];
           return DenunciaCard(

@@ -37,12 +37,28 @@ class _MapSectionState extends ConsumerState<MapSection> {
   @override
   void didUpdateWidget(MapSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.denuncias != widget.denuncias) {
+    // Só recria marcadores se a lista realmente mudou
+    if (!_denunciasAreEqual(oldWidget.denuncias, widget.denuncias)) {
       _createMarkers();
     }
   }
 
+  bool _denunciasAreEqual(
+    List<DenunciaModel> old,
+    List<DenunciaModel> current,
+  ) {
+    if (old.length != current.length) return false;
+    for (int i = 0; i < old.length; i++) {
+      if (old[i].id != current[i].id) return false;
+    }
+    return true;
+  }
+
   void _createMarkers() {
+    print(
+      '🗺️ MapSection: Criando marcadores para ${widget.denuncias.length} denúncias',
+    );
+
     final markers = <Marker>{};
 
     for (final denuncia in widget.denuncias) {
@@ -61,6 +77,8 @@ class _MapSectionState extends ConsumerState<MapSection> {
         ),
       );
     }
+
+    print('🗺️ MapSection: ${markers.length} marcadores criados');
 
     if (mounted) {
       setState(() {
@@ -129,6 +147,11 @@ class _MapSectionState extends ConsumerState<MapSection> {
           myLocationEnabled: true,
           myLocationButtonEnabled: false,
           zoomControlsEnabled: false,
+          // Otimizações de performance
+          buildingsEnabled: false,
+          trafficEnabled: false,
+          indoorViewEnabled: false,
+          minMaxZoomPreference: const MinMaxZoomPreference(10, 18),
           onMapCreated: (controller) {
             _mapController = controller;
           },
@@ -175,10 +198,7 @@ class _MapSectionState extends ConsumerState<MapSection> {
             mini: true,
             backgroundColor: AppColors.background,
             onPressed: _centerMap,
-            child: const Icon(
-              Icons.my_location,
-              color: AppColors.primaryRed,
-            ),
+            child: const Icon(Icons.my_location, color: AppColors.primaryRed),
           ),
         ),
       ],

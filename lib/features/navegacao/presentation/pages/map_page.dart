@@ -57,7 +57,9 @@ class _MapPageState extends ConsumerState<MapPage> {
 
   Future<void> _loadCategorias() async {
     try {
-      final categorias = await ref.read(denunciasRepositoryProvider).getCategorias();
+      final categorias = await ref
+          .read(denunciasRepositoryProvider)
+          .getCategorias();
       if (mounted) {
         setState(() => _categorias = categorias);
       }
@@ -80,10 +82,12 @@ class _MapPageState extends ConsumerState<MapPage> {
   }
 
   void _applyFilters() {
-    ref.read(denunciasNotifierProvider.notifier).loadAllDenuncias(
-      status: _currentFilters?.status,
-      categoria: _currentFilters?.categoriaId,
-    );
+    ref
+        .read(denunciasNotifierProvider.notifier)
+        .loadAllDenuncias(
+          status: _currentFilters?.status,
+          categoria: _currentFilters?.categoriaId,
+        );
   }
 
   List<DenunciaModel> _getFilteredDenuncias(List<DenunciaModel> denuncias) {
@@ -118,15 +122,15 @@ class _MapPageState extends ConsumerState<MapPage> {
     final denunciasState = ref.watch(denunciasNotifierProvider);
     final filteredDenuncias = _getFilteredDenuncias(denunciasState.denuncias);
     final screenHeight = MediaQuery.of(context).size.height;
+    final mapHeight = screenHeight * 0.40;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            // Mapa - ocupa mais espaço
             SizedBox(
-              height: screenHeight * 0.50,
+              height: mapHeight,
               child: MapSection(
                 denuncias: filteredDenuncias,
                 initialLat: widget.searchLat,
@@ -134,55 +138,8 @@ class _MapPageState extends ConsumerState<MapPage> {
                 onMarkerTap: _handleMarkerTap,
               ),
             ),
-
-            // Componente da lista - sobrepõe o mapa com bordas arredondadas
-            Positioned(
-              top: screenHeight * 0.42, // Começa antes para sobrepor
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 70), // Espaço para a barra de busca
-
-                    // Lista de denúncias
-                    Expanded(
-                      child: MapDenunciasList(
-                        denuncias: filteredDenuncias,
-                        isLoading: denunciasState.isLoading,
-                        onRefresh: () {
-                          ref.read(denunciasNotifierProvider.notifier).loadAllDenuncias(
-                            status: _currentFilters?.status,
-                            categoria: _currentFilters?.categoriaId,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Barra de busca + filtro - flutuando entre o mapa e o componente
-            Positioned(
-              top: screenHeight * 0.42 + 10, // Posicionada dentro do componente arredondado
-              left: 16,
-              right: 16,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
                   Expanded(
@@ -240,14 +197,14 @@ class _MapPageState extends ConsumerState<MapPage> {
                     ),
                   ),
                   const SizedBox(width: AppSizes.spacing12),
-                  
-                  // Filter button
                   Container(
                     height: 56,
                     width: 56,
                     decoration: BoxDecoration(
                       color: const Color(0xFF232229),
-                      borderRadius: BorderRadius.circular(AppSizes.borderRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppSizes.borderRadius,
+                      ),
                       border: Border.all(
                         color: AppColors.primaryRed,
                         width: 1.5,
@@ -267,6 +224,36 @@ class _MapPageState extends ConsumerState<MapPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: MapDenunciasList(
+                  denuncias: filteredDenuncias,
+                  isLoading: denunciasState.isLoading,
+                  onRefresh: () {
+                    ref
+                        .read(denunciasNotifierProvider.notifier)
+                        .loadAllDenuncias(
+                          status: _currentFilters?.status,
+                          categoria: _currentFilters?.categoriaId,
+                        );
+                  },
+                ),
               ),
             ),
           ],

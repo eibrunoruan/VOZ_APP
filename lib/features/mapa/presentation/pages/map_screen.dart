@@ -17,7 +17,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   GoogleMapController? _mapController;
   Set<Marker> _markers = {};
   LatLng? _userLocation;
-  bool _isLoadingLocation = true;
 
   @override
   void initState() {
@@ -28,14 +27,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ref.read(denunciasNotifierProvider.notifier).loadAllDenuncias();
     });
   }
-  
+
   Future<void> _getUserLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        if (mounted) {
-          setState(() => _isLoadingLocation = false);
-        }
         return;
       }
 
@@ -43,17 +39,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          if (mounted) {
-            setState(() => _isLoadingLocation = false);
-          }
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          setState(() => _isLoadingLocation = false);
-        }
         return;
       }
 
@@ -61,33 +51,39 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (mounted) {
         setState(() {
           _userLocation = LatLng(position.latitude, position.longitude);
-          _isLoadingLocation = false;
         });
-        
+
         // Centraliza o mapa na localização do usuário
         _mapController?.animateCamera(
           CameraUpdate.newLatLngZoom(_userLocation!, 14),
         );
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoadingLocation = false);
-      }
+      // Ignora erros de localização
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _createMarkers();
+    // Atualiza marcadores quando as dependências mudarem
+    _updateMarkers();
   }
 
-  Set<Marker> _buildMarkers() {
-    final denunciasState = ref.watch(denunciasNotifierProvider);
-    final markers = <Marker>{};
+  void _updateMarkers() {
+    final denunciasState = ref.read(denunciasNotifierProvider);
+
+    // Debug: verifica se as denúncias foram carregadas
+    print(
+      '🗺️ Atualizando marcadores: ${denunciasState.denuncias.length} denúncias',
+    );
+
+    if (denunciasState.denuncias.isEmpty) return;
+
+    final newMarkers = <Marker>{};
 
     for (final denuncia in denunciasState.denuncias) {
-      markers.add(
+      newMarkers.add(
         Marker(
           markerId: MarkerId(denuncia.id.toString()),
           position: LatLng(denuncia.latitude, denuncia.longitude),
@@ -111,15 +107,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       );
     }
 
-    return markers;
-  }
+    print('🗺️ Marcadores criados: ${newMarkers.length}');
 
-  void _createMarkers() {
-    // Deprecated - agora usando _buildMarkers() com lazy loading
-    final markers = _buildMarkers();
-    if (mounted) {
+    if (mounted && newMarkers.isNotEmpty) {
       setState(() {
-        _markers = markers;
+        _markers = newMarkers;
       });
     }
   }
@@ -142,19 +134,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final denunciasState = ref.watch(denunciasNotifierProvider);
-    
-    // Atualiza marcadores quando denúncias mudarem
-    if (denunciasState.denuncias.isNotEmpty) {
-      _createMarkers();
-    }
+
+    // Atualiza marcadores somente quando as denúncias mudarem
+    ref.listen<DenunciasState>(denunciasNotifierProvider, (previous, next) {
+      if (previous?.denuncias != next.denuncias) {
+        _updateMarkers();
+      }
+    });
 
     final denuncias = denunciasState.denuncias;
 
     // Usa localização do usuário se disponível, senão usa São Paulo
-    LatLng centerPosition = _userLocation ?? const LatLng(
-      -23.550520,
-      -46.633308,
-    );
+    LatLng centerPosition =
+        _userLocation ?? const LatLng(-23.550520, -46.633308);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -187,13 +179,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ),
       body: Stack(
         children: [
-
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: centerPosition,
               zoom: 12,
             ),
-            markers: _buildMarkers(),
+            markers: _markers,
             mapType: MapType.normal,
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
